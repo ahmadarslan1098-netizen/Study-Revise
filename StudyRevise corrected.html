@@ -1,0 +1,709 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+<title>StudyRevise ⚡</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+html,body{height:100%;background:#060610;font-family:'Courier New',monospace;color:#e2e8f0;overflow-x:hidden;}
+#app{max-width:480px;margin:0 auto;min-height:100vh;position:relative;background:linear-gradient(160deg,#060610 0%,#0a0d1a 60%,#060610 100%);}
+.btn{border-radius:8px;padding:10px 14px;cursor:pointer;font-family:'Courier New',monospace;font-size:11px;font-weight:bold;border:1px solid;transition:opacity 0.15s;}
+input[type=text],input[type=email],input[type=password]{background:rgba(255,255,255,0.05);border:1px solid rgba(79,195,247,0.2);border-radius:8px;padding:9px 11px;color:#e2e8f0;font-family:'Courier New',monospace;font-size:12px;outline:none;width:100%;}
+.opt-btn{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);color:#94a3b8;border-radius:9px;padding:11px 13px;cursor:pointer;font-family:'Courier New',monospace;font-size:12px;text-align:left;display:flex;align-items:center;gap:9px;width:100%;margin-bottom:8px;transition:all 0.15s;}
+.opt-btn.correct{background:rgba(105,240,174,0.12)!important;border-color:#69f0ae55!important;color:#69f0ae!important;}
+.opt-btn.wrong{background:rgba(255,82,82,0.1)!important;border-color:#ff525244!important;color:#ff8a80!important;}
+.auth-wrap{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:30px 18px;background:linear-gradient(160deg,#060610 0%,#0a0d1a 60%,#060610 100%);}
+.auth-card{width:100%;max-width:380px;background:rgba(255,255,255,0.03);border:1px solid rgba(79,195,247,0.15);border-radius:16px;padding:28px 24px;}
+.auth-btn{background:rgba(79,195,247,0.15);border:1px solid rgba(79,195,247,0.4);color:#4fc3f7;border-radius:9px;padding:13px;font-size:13px;width:100%;cursor:pointer;font-family:'Courier New',monospace;font-weight:bold;margin-top:4px;}
+.auth-btn:hover{background:rgba(79,195,247,0.25);}
+.err-msg{background:rgba(255,82,82,0.1);border:1px solid rgba(255,82,82,0.3);color:#ff8a80;border-radius:8px;padding:10px 12px;font-size:11px;margin-bottom:12px;}
+.ok-msg{background:rgba(105,240,174,0.1);border:1px solid rgba(105,240,174,0.3);color:#69f0ae;border-radius:8px;padding:10px 12px;font-size:11px;margin-bottom:12px;}
+</style>
+</head>
+<body>
+<div id="app"><div style="display:flex;align-items:center;justify-content:center;min-height:100vh;"><div style="color:#4fc3f7;font-size:13px;letter-spacing:2px;">LOADING...</div></div></div>
+
+<script>
+// ─── Constants ────────────────────────────────────────────────────────────────
+const STORE_KEY='studyrevise_v1';
+const USERS_KEY='studyrevise_users';
+const TODAY=new Date().toISOString().slice(0,10);
+const FREE_TOPIC_LIMIT=3;
+
+// ─── Auth State ───────────────────────────────────────────────────────────────
+let currentUser=null;
+let userPlan='free';
+
+// ─── Local Auth Helpers ───────────────────────────────────────────────────────
+function getUsers(){try{return JSON.parse(localStorage.getItem(USERS_KEY)||'{}');}catch(e){return {};}}
+function saveUsers(u){localStorage.setItem(USERS_KEY,JSON.stringify(u));}
+
+function localSignUp(name,email,pass){
+  if(!email||!pass)return{error:'Please fill in all fields.'};
+  if(pass.length<6)return{error:'Password must be at least 6 characters.'};
+  const users=getUsers();
+  const key=email.toLowerCase().trim();
+  if(users[key])return{error:'An account with this email already exists. Please sign in.'};
+  const uid='u_'+Date.now();
+  users[key]={uid,name:name||'',email:key,passHash:simpleHash(pass),plan:'free',created:TODAY};
+  saveUsers(users);
+  return{user:{id:uid,email:key,name:name||''}};
+}
+
+function localSignIn(email,pass){
+  if(!email||!pass)return{error:'Please fill in all fields.'};
+  const users=getUsers();
+  const key=email.toLowerCase().trim();
+  const u=users[key];
+  if(!u)return{error:'No account found with this email. Please create one.'};
+  if(u.passHash!==simpleHash(pass))return{error:'Incorrect password. Please try again.'};
+  return{user:{id:u.uid,email:key,name:u.name,plan:u.plan||'free'}};
+}
+
+function simpleHash(s){let h=0;for(let i=0;i<s.length;i++){h=((h<<5)-h)+s.charCodeAt(i);h|=0;}return h.toString(36);}
+
+// ─── Semester & Subject Data ──────────────────────────────────────────────────
+const SEM_META={
+  S1:{accent:"#4fc3f7",bg:"#0d1e35",label:"Year 1 · Sem 1"},
+  S2:{accent:"#69f0ae",bg:"#0d2219",label:"Year 1 · Sem 2"},
+  S3:{accent:"#ce93d8",bg:"#1e0d2d",label:"Year 2 · Sem 1"},
+  S4:{accent:"#ffb74d",bg:"#2d1a00",label:"Year 2 · Sem 2"},
+  S5:{accent:"#f48fb1",bg:"#2d0d1a",label:"Year 3 · Sem 1"},
+  S6:{accent:"#80cbc4",bg:"#0d2420",label:"Year 3 · Sem 2"},
+  S7:{accent:"#fff176",bg:"#2d2a00",label:"Year 4 · Sem 1"},
+  S8:{accent:"#ef9a9a",bg:"#2d0d0d",label:"Year 4 · Sem 2"}
+};
+
+// Generic suggested subjects for each semester (works any discipline)
+const SUGGESTED={
+  S1:["Mathematics I","Physics / Chemistry","Introduction to Programming","Communication Skills","Critical Thinking"],
+  S2:["Mathematics II","Statistics & Probability","Data Structures","Technical Writing","Economics Basics"],
+  S3:["Linear Algebra","Discrete Mathematics","Algorithms","Research Methodology","Elective I"],
+  S4:["Calculus III","Database Systems","Operating Systems","Project Management","Elective II"],
+  S5:["Machine Learning","Computer Networks","Software Engineering","Ethics in Technology","Elective III"],
+  S6:["Artificial Intelligence","Cloud Computing","Cybersecurity","Entrepreneurship","Elective IV"],
+  S7:["Capstone Project I","Advanced Topics I","Advanced Topics II","Industry Internship","Seminar"],
+  S8:["Capstone Project II","Thesis / Dissertation","Professional Practice","Elective V","Career Development"]
+};
+
+// ─── Generic Concept Generator ────────────────────────────────────────────────
+function getGenericConcepts(topic){
+  return[
+    {
+      title:topic+" — Foundations",
+      spark:"Every subject begins with core principles. Mastering "+topic+"'s fundamentals builds a scaffold for everything that follows.",
+      core:[
+        "Start by mapping the key terms and definitions in "+topic,
+        "Understand the governing principles, laws, or theorems",
+        "Learn standard notation, symbols, and conventions used in the field",
+        "Practice solving simple problems before tackling complex ones"
+      ],
+      realWorld:"Professionals use "+topic+" in real-world design, analysis, and decision-making every day across industries worldwide.",
+      interview:"A classic first question: 'Explain the fundamental concept of "+topic+" in simple terms.' Show you can communicate clearly.",
+      market:"Demand for expertise in "+topic+" continues to grow as industries automate and digitise their core processes."
+    },
+    {
+      title:topic+" — Analysis Methods",
+      spark:"Systematic analysis unlocks any problem in "+topic+": identify the system, apply the right model, interpret results critically.",
+      core:[
+        "Break complex problems into manageable sub-problems",
+        "Choose the right analytical tool: quantitative, qualitative, or simulation-based",
+        "Validate your model against known cases before applying it to unknowns",
+        "Always sanity-check units, dimensions, and orders of magnitude"
+      ],
+      realWorld:"Industries from healthcare to finance rely on rigorous "+topic+" analysis to reduce costs and improve outcomes.",
+      interview:"'Walk me through your problem-solving approach for "+topic+".' Interviewers value structured thinking above memorised answers.",
+      market:"Automation tools powered by AI are augmenting (not replacing) "+topic+" specialists, raising the value of deep domain expertise."
+    },
+    {
+      title:topic+" — Emerging Trends",
+      spark:topic+" is being reshaped by AI-driven tools, globalisation, and cross-disciplinary collaboration.",
+      core:[
+        "Machine learning is automating routine analysis tasks in "+topic,
+        "Open-source tools and datasets accelerate research and learning",
+        "Cross-disciplinary teams bring fresh perspectives to classic "+topic+" challenges",
+        "Sustainability and ethics are becoming core dimensions of every "+topic+" project"
+      ],
+      realWorld:"Startups and established firms alike are hiring people who combine strong "+topic+" foundations with modern toolsets.",
+      interview:"'How is "+topic+" changing with Industry 4.0 and AI?' Show awareness of digital transformation and where skills are heading.",
+      market:"Venture capital investment in "+topic+"-adjacent deep tech reached record levels recently, signalling long-term career opportunities."
+    }
+  ];
+}
+
+function getConceptsForTopic(t){return getGenericConcepts(t);}
+function getDailyConceptIndex(topic){const dateNum=parseInt(TODAY.replace(/-/g,''),10);const seed=topic.split('').reduce((a,c)=>a+c.charCodeAt(0),0);const arr=getConceptsForTopic(topic);return(dateNum+seed)%arr.length;}
+function getDailyConcept(t){const arr=getConceptsForTopic(t);return arr[getDailyConceptIndex(t)];}
+
+// ─── Generic Quiz Generator ────────────────────────────────────────────────────
+function getQuiz(topic){
+  return[
+    {q:"What is the best first step when approaching a new problem in "+topic+"?",options:["Jump straight to a solution","Break the problem into smaller sub-problems","Google the answer immediately","Skip it and move on"],ans:1},
+    {q:"Which approach is most effective for long-term retention of "+topic+" concepts?",options:["Read notes the night before an exam","Passive re-reading","Active recall and spaced repetition","Highlighting everything"],ans:2},
+    {q:"Analysing "+topic+" problems often involves:",options:["Guessing randomly","Applying systematic frameworks and models","Ignoring edge cases","Using only memory"],ans:1},
+    {q:"When your answer in "+topic+" seems wrong, you should first:",options:["Change it immediately","Check your assumptions and re-read the question","Accept it as correct","Ask someone else to solve it for you"],ans:1},
+    {q:"The most important habit for mastering "+topic+" over a semester is:",options:["Cramming before exams","Consistent daily practice and review","Only attending lectures","Memorising past papers without understanding"],ans:0}
+  ];
+}
+
+// ─── App State ────────────────────────────────────────────────────────────────
+function defaultState(){return{screen:'onboarding',obStep:0,name:'',currentSem:'S1',topics:JSON.parse(JSON.stringify(SUGGESTED)),obActiveSem:'S1',obInput:'',reviewed:[],studyDays:1,lastStudyDate:'',strength:{},quizScores:{},activeTopic:null,activeQuiz:null,quizState:null,expandedSem:null,notifyOn:false,homeAddOpen:{},homeAddInput:{}};}
+
+function loadState(){
+  try{
+    const raw=localStorage.getItem(STORE_KEY);
+    if(!raw)return defaultState();
+    const saved=JSON.parse(raw);
+    const base=defaultState();
+    const merged=Object.assign(base,saved);
+    merged.activeTopic=null;merged.activeQuiz=null;merged.quizState=null;merged.obInput='';merged.homeAddOpen={};merged.homeAddInput={};
+    if(merged.lastStudyDate){const last=new Date(merged.lastStudyDate);const diffDays=Math.round((new Date(TODAY)-last)/86400000);if(diffDays>1){merged.studyDays=0;}}
+    if(merged.reviewDate!==TODAY){merged.reviewed=[];merged.reviewDate=TODAY;}
+    return merged;
+  }catch(e){return defaultState();}
+}
+
+function saveState(){
+  try{
+    const toSave=Object.assign({},S);
+    toSave.activeTopic=null;toSave.activeQuiz=null;toSave.quizState=null;toSave.obInput='';toSave.reviewDate=TODAY;
+    if(currentUser){toSave._uid=currentUser.id;}
+    localStorage.setItem(STORE_KEY,JSON.stringify(toSave));
+  }catch(e){}
+}
+
+const S=loadState();
+
+// ─── DOM Helpers ──────────────────────────────────────────────────────────────
+function h(tag,attrs,children){const el=document.createElement(tag);if(attrs)Object.entries(attrs).forEach(([k,v])=>{if(k==='style'&&typeof v==='object')Object.assign(el.style,v);else if(k.startsWith('on'))el.addEventListener(k.slice(2).toLowerCase(),v);else if(k==='className')el.className=v;else el.setAttribute(k,v);});if(children)([].concat(children)).forEach(c=>{if(c===null||c===undefined)return;el.appendChild(typeof c==='string'?document.createTextNode(c):c);});return el;}
+function div(s,c){const e=document.createElement('div');e.style.cssText=s||'';if(c)([].concat(c)).forEach(x=>x&&e.appendChild(typeof x==='string'?document.createTextNode(x):x));return e;}
+function span(s,t){const e=document.createElement('span');e.style.cssText=s||'';e.textContent=t;return e;}
+function btn(s,t,cb){const e=document.createElement('button');e.style.cssText=s||'';e.textContent=t;if(cb)e.addEventListener('click',cb);return e;}
+
+// ─── Auth Screen ──────────────────────────────────────────────────────────────
+function renderAuth(mode='login'){
+  const wrap=div('min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:30px 18px;background:linear-gradient(160deg,#060610 0%,#0a0d1a 60%,#060610 100%);');
+  const logoDiv=div('margin-bottom:28px;text-align:center;');
+  logoDiv.innerHTML='<div style="font-size:38px;margin-bottom:8px;filter:drop-shadow(0 0 16px #4fc3f7)">📚</div><div style="color:#4fc3f7;font-weight:bold;font-size:22px;letter-spacing:3px;">STUDY<span style="color:#ffb74d">REVISE</span></div><div style="color:#475569;font-size:11px;margin-top:4px;">YOUR PERSONAL REVISION COMPANION</div>';
+  wrap.appendChild(logoDiv);
+
+  const card=div('width:100%;max-width:380px;background:rgba(255,255,255,0.03);border:1px solid rgba(79,195,247,0.15);border-radius:16px;padding:28px 24px;');
+  card.appendChild(div('font-size:18px;font-weight:bold;margin-bottom:6px;color:#e2e8f0;',[mode==='login'?'Sign In':'Create Account']));
+  card.appendChild(div('font-size:11px;color:#475569;margin-bottom:20px;',[mode==='login'?'Welcome back to StudyRevise':'Start your revision journey today']));
+
+  const errDiv=div('display:none;');errDiv.className='err-msg';card.appendChild(errDiv);
+  const okDiv=div('display:none;');okDiv.className='ok-msg';card.appendChild(okDiv);
+
+  function showErr(msg){errDiv.textContent=msg;errDiv.style.display='block';okDiv.style.display='none';}
+  function showOk(msg){okDiv.textContent=msg;okDiv.style.display='block';errDiv.style.display='none';}
+
+  let nameInp=null;
+  if(mode==='signup'){
+    card.appendChild(div('color:#475569;font-size:9px;letter-spacing:3px;text-transform:uppercase;margin-bottom:6px;',['YOUR NAME']));
+    nameInp=h('input',{type:'text',placeholder:'e.g. Sara'});
+    nameInp.style.marginBottom='14px';
+    card.appendChild(nameInp);
+  }
+
+  card.appendChild(div('color:#475569;font-size:9px;letter-spacing:3px;text-transform:uppercase;margin-bottom:6px;',['EMAIL']));
+  const emailInp=h('input',{type:'email',placeholder:'you@email.com'});
+  emailInp.style.marginBottom='14px';
+  card.appendChild(emailInp);
+
+  card.appendChild(div('color:#475569;font-size:9px;letter-spacing:3px;text-transform:uppercase;margin-bottom:6px;',['PASSWORD']));
+  const passInp=h('input',{type:'password',placeholder:'Min. 6 characters'});
+  passInp.style.marginBottom='18px';
+  card.appendChild(passInp);
+
+  const submitBtn=btn('background:rgba(79,195,247,0.15);border:1px solid rgba(79,195,247,0.4);color:#4fc3f7;border-radius:9px;padding:13px;font-size:13px;width:100%;cursor:pointer;font-family:Courier New,monospace;font-weight:bold;margin-bottom:14px;',mode==='login'?'Sign In →':'Create Account →',()=>{
+    const email=emailInp.value.trim();
+    const pass=passInp.value;
+    const name=nameInp?nameInp.value.trim():'';
+
+    submitBtn.textContent='Please wait...';submitBtn.disabled=true;
+
+    try{
+      if(mode==='login'){
+        const {user,error}=localSignIn(email,pass);
+        if(error){showErr(error);submitBtn.textContent='Sign In →';submitBtn.disabled=false;return;}
+        currentUser=user;
+        userPlan=user.plan||'free';
+        if(name)S.name=name;
+        // Load user-specific state if exists
+        const savedRaw=localStorage.getItem(STORE_KEY+'_'+user.id);
+        if(savedRaw){try{const saved=JSON.parse(savedRaw);Object.assign(S,saved);S.activeTopic=null;S.activeQuiz=null;S.quizState=null;}catch(e){}}
+        if(S.screen==='onboarding'&&S.name)S.screen='home';
+        render();
+      } else {
+        const {user,error}=localSignUp(name,email,pass);
+        if(error){showErr(error);submitBtn.textContent='Create Account →';submitBtn.disabled=false;return;}
+        currentUser=user;
+        userPlan='free';
+        if(name)S.name=name;
+        S.screen='onboarding';
+        render();
+      }
+    }catch(e){
+      showErr('Something went wrong. Please try again.');
+      submitBtn.textContent=mode==='login'?'Sign In →':'Create Account →';
+      submitBtn.disabled=false;
+    }
+  });
+  card.appendChild(submitBtn);
+
+  // Also allow guest / skip login
+  const guestBtn=btn('background:none;border:1px solid rgba(255,255,255,0.08);color:#475569;border-radius:9px;padding:10px;font-size:11px;width:100%;cursor:pointer;font-family:Courier New,monospace;margin-bottom:14px;','Continue as Guest →',()=>{
+    currentUser={id:'guest',email:'guest',name:'Student'};
+    userPlan='free';
+    render();
+  });
+  card.appendChild(guestBtn);
+
+  const switchMode=div('text-align:center;');
+  const switchBtn=btn('background:none;border:none;color:#475569;font-size:11px;cursor:pointer;font-family:Courier New,monospace;text-decoration:underline;',mode==='login'?'No account? Create one free →':'Already have an account? Sign in',()=>{
+    document.getElementById('app').innerHTML='';
+    document.getElementById('app').appendChild(renderAuth(mode==='login'?'signup':'login'));
+  });
+  switchMode.appendChild(switchBtn);card.appendChild(switchMode);
+  wrap.appendChild(card);
+  return wrap;
+}
+
+// ─── Save per-user state ───────────────────────────────────────────────────────
+function saveUserState(){
+  if(!currentUser||currentUser.id==='guest')return;
+  try{
+    const toSave=Object.assign({},S);
+    toSave.activeTopic=null;toSave.activeQuiz=null;toSave.quizState=null;toSave.obInput='';toSave.reviewDate=TODAY;
+    localStorage.setItem(STORE_KEY+'_'+currentUser.id,JSON.stringify(toSave));
+  }catch(e){}
+}
+
+// ─── Render ───────────────────────────────────────────────────────────────────
+function render(){
+  saveState();
+  saveUserState();
+  proGateShown=false;
+  const app=document.getElementById('app');app.innerHTML='';
+  if(!currentUser){app.appendChild(renderAuth('login'));return;}
+  if(S.screen==='onboarding'){app.appendChild(renderOnboarding());return;}
+  app.appendChild(renderTopbar());
+  const content=div('padding:16px 14px 90px;');
+  if(S.screen==='revision'&&S.activeTopic)content.appendChild(renderRevision());
+  else if(S.screen==='quizrun'&&S.activeQuiz)content.appendChild(renderQuizRun());
+  else if(S.screen==='home')content.appendChild(renderHome());
+  else if(S.screen==='quiz')content.appendChild(renderQuizList());
+  else if(S.screen==='progress')content.appendChild(renderProgress());
+  else if(S.screen==='topics')content.appendChild(renderTopicsMgr());
+  else if(S.screen==='settings')content.appendChild(renderSettings());
+  app.appendChild(content);
+  app.appendChild(renderBottomNav());
+}
+
+function renderTopbar(){
+  const bar=div('background:rgba(6,6,16,0.95);border-bottom:1px solid rgba(79,195,247,0.18);padding:12px 16px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;');
+  const logo=div('color:#4fc3f7;font-weight:bold;font-size:17px;letter-spacing:2px;');
+  logo.innerHTML='STUDY<span style="color:#ffb74d">REVISE</span>';
+  const right=div('display:flex;gap:8px;align-items:center;');
+  right.appendChild(div('background:rgba(255,183,77,0.12);color:#ffb74d;padding:4px 10px;border-radius:20px;font-size:11px;border:1px solid rgba(255,183,77,0.3);',['🔥 '+S.studyDays+'d']));
+  right.appendChild(span('color:#64748b;font-size:10px;',S.name||'Student'));
+  bar.appendChild(logo);bar.appendChild(right);
+  return bar;
+}
+
+function renderBottomNav(){
+  const NAV=[{id:'home',icon:'🏠',label:'TODAY'},{id:'quiz',icon:'🧠',label:'QUIZ'},{id:'progress',icon:'📊',label:'STATS'},{id:'topics',icon:'✏️',label:'TOPICS'},{id:'settings',icon:'⚙️',label:'ACCOUNT'}];
+  const nav=div('position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;background:rgba(6,6,16,0.97);border-top:1px solid rgba(79,195,247,0.12);display:flex;justify-content:space-around;padding:8px 0 12px;z-index:100;');
+  NAV.forEach(n=>{
+    const b=div('background:none;display:flex;flex-direction:column;align-items:center;gap:2px;padding:0 8px;cursor:pointer;min-width:48px;');
+    b.appendChild(div('font-size:18px;text-align:center;',[n.icon]));
+    b.appendChild(span('font-size:8px;letter-spacing:1px;color:'+(S.screen===n.id?'#4fc3f7':'#475569'),n.label));
+    if(S.screen===n.id)b.appendChild(div('width:3px;height:3px;background:#4fc3f7;border-radius:50%;margin:1px auto 0;box-shadow:0 0 5px #4fc3f7;'));
+    b.addEventListener('click',()=>{S.screen=n.id;S.activeTopic=null;S.activeQuiz=null;S.quizState=null;render();});
+    nav.appendChild(b);
+  });
+  return nav;
+}
+
+// ─── Pro Gate Banner ──────────────────────────────────────────────────────────
+let proGateShown=false;
+function renderProGate(){
+  if(proGateShown)return null;
+  proGateShown=true;
+  const gate=div('background:linear-gradient(145deg,rgba(255,183,77,0.08),rgba(6,6,16,0.95));border:1px solid rgba(255,183,77,0.3);border-radius:14px;padding:22px;text-align:center;margin:12px 0;');
+  gate.innerHTML=`
+    <div style="font-size:22px;margin-bottom:8px;">⚡</div>
+    <div style="font-size:16px;font-weight:bold;margin-bottom:8px;color:#ffb74d;">Upgrade to Pro</div>
+    <div style="font-size:11px;color:#94a3b8;line-height:1.7;margin-bottom:14px;">Free plan shows ${FREE_TOPIC_LIMIT} topics per semester.<br>Upgrade for unlimited subjects, full quiz banks, and streak tracking.</div>
+    <div style="font-size:20px;color:#ffb74d;font-weight:bold;margin-bottom:14px;">$4.99 / month</div>
+    <button onclick="goUpgrade()" style="background:rgba(255,183,77,0.2);border:1px solid rgba(255,183,77,0.5);color:#ffb74d;border-radius:9px;padding:12px 24px;font-size:13px;cursor:pointer;font-family:Courier New,monospace;font-weight:bold;width:100%;">Upgrade Now →</button>
+  `;
+  return gate;
+}
+function goUpgrade(){alert('Payment system coming soon! Check back shortly.');}
+
+// ─── Onboarding ───────────────────────────────────────────────────────────────
+function renderOnboarding(){
+  const wrap=div('min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding:40px 18px 40px;background:linear-gradient(160deg,#060610 0%,#0a0d1a 60%,#060610 100%);');
+  const logoDiv=div('margin-bottom:28px;text-align:center;');
+  logoDiv.innerHTML='<div style="font-size:38px;margin-bottom:8px;filter:drop-shadow(0 0 16px #4fc3f7)">📚</div><div style="color:#4fc3f7;font-weight:bold;font-size:22px;letter-spacing:3px;">STUDY<span style="color:#ffb74d">REVISE</span></div><div style="color:#475569;font-size:11px;margin-top:4px;">YOUR PERSONAL REVISION COMPANION</div>';
+  wrap.appendChild(logoDiv);
+
+  const pct=[33,66,100][S.obStep];
+  const progWrap=div('width:100%;max-width:420px;background:rgba(255,255,255,0.06);border-radius:4px;height:4px;margin-bottom:28px;');
+  progWrap.appendChild(div(`height:100%;background:linear-gradient(90deg,#4fc3f7,#ffb74d);border-radius:4px;width:${pct}%;transition:width 0.4s;`));
+  wrap.appendChild(progWrap);
+
+  const card=div('width:100%;max-width:420px;');
+  if(S.obStep===0){
+    card.innerHTML=`<div style="font-size:20px;font-weight:bold;margin-bottom:6px;color:#e2e8f0;">Welcome! 👋</div><div style="color:#64748b;font-size:13px;margin-bottom:22px;">Let's personalise your revision experience.</div>`;
+    const lbl1=div('color:#475569;font-size:9px;letter-spacing:3px;text-transform:uppercase;margin-bottom:6px;',['YOUR NAME']);
+    const inp=h('input',{type:'text',placeholder:'e.g. Sara'});inp.value=S.name;inp.style.marginBottom='18px';
+    inp.addEventListener('input',e=>S.name=e.target.value);
+    const lbl2=div('color:#475569;font-size:9px;letter-spacing:3px;text-transform:uppercase;margin-bottom:8px;',['CURRENT SEMESTER / YEAR']);
+    const semGrid=div('display:flex;gap:8px;flex-wrap:wrap;margin-bottom:26px;');
+    ['S1','S2','S3','S4','S5','S6','S7','S8'].forEach(s=>{
+      const {accent}=SEM_META[s];const active=S.currentSem===s;
+      const b=btn(`background:${active?'rgba(79,195,247,0.15)':'rgba(255,255,255,0.04)'};border:1px solid ${active?'rgba(79,195,247,0.5)':'rgba(255,255,255,0.08)'};color:${active?accent:'#64748b'};border-radius:20px;padding:7px 16px;font-size:12px;cursor:pointer;font-family:Courier New,monospace;`,s+(active?' ✓':''),()=>{S.currentSem=s;render();});
+      semGrid.appendChild(b);
+    });
+    const nameErrMsg=div('color:#ff8a80;font-size:11px;margin-top:-12px;margin-bottom:10px;display:none;',['⚠ Please enter your name to continue.']);
+    card.appendChild(lbl1);card.appendChild(inp);card.appendChild(nameErrMsg);
+    const nextBtn=btn('background:rgba(79,195,247,0.15);border:1px solid rgba(79,195,247,0.4);color:#4fc3f7;border-radius:9px;padding:13px;font-size:13px;width:100%;cursor:pointer;font-family:Courier New,monospace;font-weight:bold;','Next → Add My Subjects',()=>{
+      if(!S.name||!S.name.trim()){nameErrMsg.style.display='block';inp.style.borderColor='rgba(255,82,82,0.5)';return;}
+      S.obStep=1;render();
+    });
+    card.appendChild(lbl2);card.appendChild(semGrid);card.appendChild(nextBtn);
+
+  } else if(S.obStep===1){
+    card.innerHTML=`<div style="font-size:20px;font-weight:bold;margin-bottom:6px;color:#e2e8f0;">Your Subjects 📚</div><div style="color:#64748b;font-size:13px;margin-bottom:16px;">Tap suggestions or type your own for each semester. Works for any degree!</div>`;
+    const semTabs=div('display:flex;gap:7px;margin-bottom:14px;overflow-x:auto;padding-bottom:4px;');
+    ['S1','S2','S3','S4','S5','S6','S7','S8'].forEach(s=>{
+      const {accent}=SEM_META[s];const active=S.obActiveSem===s;const cnt=S.topics[s].length;
+      const b=btn(`background:${active?accent+'22':'rgba(255,255,255,0.04)'};border:1px solid ${active?accent+'55':'rgba(255,255,255,0.08)'};color:${active?accent:'#64748b'};border-radius:20px;padding:6px 13px;font-size:10px;cursor:pointer;font-family:Courier New,monospace;flex-shrink:0;`,s+(cnt?` (${cnt})`:''),()=>{S.obActiveSem=s;render();});
+      semTabs.appendChild(b);
+    });
+    card.appendChild(semTabs);
+    const sugLbl=div('color:#475569;font-size:9px;letter-spacing:3px;text-transform:uppercase;margin-bottom:8px;',['SUGGESTIONS FOR '+S.obActiveSem+' (CUSTOMISE AS NEEDED)']);
+    const sugGrid=div('display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px;');
+    SUGGESTED[S.obActiveSem].forEach(t=>{
+      const added=S.topics[S.obActiveSem].includes(t);
+      const b=btn(`background:${added?'rgba(105,240,174,0.12)':'rgba(255,255,255,0.04)'};border:1px solid ${added?'rgba(105,240,174,0.3)':'rgba(255,255,255,0.1)'};color:${added?'#69f0ae':'#94a3b8'};padding:5px 10px;border-radius:6px;font-size:11px;cursor:pointer;font-family:Courier New,monospace;`,(added?'✓ ':'')+t,()=>{if(!added)S.topics[S.obActiveSem].push(t);else S.topics[S.obActiveSem]=S.topics[S.obActiveSem].filter(x=>x!==t);render();});
+      sugGrid.appendChild(b);
+    });
+    card.appendChild(sugLbl);card.appendChild(sugGrid);
+    const customLbl=div('color:#475569;font-size:9px;letter-spacing:3px;text-transform:uppercase;margin-bottom:6px;',['ADD YOUR OWN SUBJECT']);
+    const customRow=div('display:flex;gap:8px;margin-bottom:16px;');
+    const inp=h('input',{type:'text',placeholder:'e.g. Organic Chemistry, Calculus II...'});
+    inp.value=S.obInput;inp.addEventListener('input',e=>S.obInput=e.target.value);
+    inp.addEventListener('keydown',e=>{if(e.key==='Enter'&&S.obInput.trim()){S.topics[S.obActiveSem].push(S.obInput.trim());S.obInput='';render();}});
+    const addBtn=btn('background:rgba(105,240,174,0.1);border:1px solid rgba(105,240,174,0.3);color:#69f0ae;border-radius:8px;padding:9px 14px;font-size:12px;cursor:pointer;font-family:Courier New,monospace;white-space:nowrap;','+ Add',()=>{if(S.obInput.trim()){S.topics[S.obActiveSem].push(S.obInput.trim());S.obInput='';render();}});
+    customRow.appendChild(inp);customRow.appendChild(addBtn);
+    card.appendChild(customLbl);card.appendChild(customRow);
+    const navRow=div('display:flex;gap:10px;');
+    navRow.appendChild(btn('background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);color:#64748b;border-radius:9px;padding:12px;font-size:12px;flex:1;cursor:pointer;font-family:Courier New,monospace;','← Back',()=>{S.obStep=0;render();}));
+    navRow.appendChild(btn('background:rgba(79,195,247,0.15);border:1px solid rgba(79,195,247,0.4);color:#4fc3f7;border-radius:9px;padding:12px;font-size:12px;flex:2;cursor:pointer;font-family:Courier New,monospace;font-weight:bold;','Next →',()=>{S.obStep=2;render();}));
+    card.appendChild(navRow);
+
+  } else {
+    card.innerHTML=`<div style="font-size:20px;font-weight:bold;margin-bottom:6px;color:#e2e8f0;">Ready to Go! 🚀</div><div style="color:#64748b;font-size:13px;margin-bottom:22px;">Your study companion is set up and ready.</div>`;
+    const info=div('background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:12px;padding:18px;margin-bottom:20px;');
+    info.innerHTML=`<div style="display:flex;justify-content:space-between;margin-bottom:12px;"><span style="color:#64748b;font-size:12px;">Name</span><span style="color:#4fc3f7;font-size:12px;">${S.name||'Student'}</span></div><div style="display:flex;justify-content:space-between;"><span style="color:#64748b;font-size:12px;">Current Semester</span><span style="color:${SEM_META[S.currentSem].accent};font-size:12px;">${SEM_META[S.currentSem].label}</span></div>`;
+    card.appendChild(info);
+    const navRow=div('display:flex;gap:10px;');
+    navRow.appendChild(btn('background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);color:#64748b;border-radius:9px;padding:12px;font-size:12px;flex:1;cursor:pointer;font-family:Courier New,monospace;','← Back',()=>{S.obStep=1;render();}));
+    navRow.appendChild(btn('background:linear-gradient(90deg,rgba(79,195,247,0.3),rgba(255,183,77,0.3));border:1px solid rgba(79,195,247,0.4);color:#fff;border-radius:9px;padding:13px;font-size:13px;flex:2;cursor:pointer;font-family:Courier New,monospace;font-weight:bold;','🚀 Start Revising!',()=>{S.studyDays=1;S.screen='home';render();}));
+    card.appendChild(navRow);
+  }
+  wrap.appendChild(card);return wrap;
+}
+
+// ─── Home ─────────────────────────────────────────────────────────────────────
+function renderHome(){
+  const now=new Date();const dateStr=now.toLocaleDateString('en-US',{weekday:'long',month:'short',day:'numeric'});
+  const wrap=div('');
+  const hdr=div('margin-bottom:14px;');
+  hdr.appendChild(div('color:#475569;font-size:9px;letter-spacing:3px;text-transform:uppercase;margin-bottom:5px;',["TODAY'S REVISION"]));
+  hdr.appendChild(div('font-size:17px;font-weight:bold;margin-bottom:2px;',[dateStr]));
+  hdr.appendChild(div('font-size:10px;color:#334155;',['Concepts rotate daily per subject 🔄']));
+  wrap.appendChild(hdr);
+
+  const days=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];const todayIdx=now.getDay();
+  const weekWrap=div('background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:10px;padding:10px 12px;margin-bottom:14px;');
+  const weekGrid=div('display:flex;gap:4px;');
+  days.forEach((d,i)=>{const active=i===todayIdx;const col=div('flex:1;text-align:center;');col.appendChild(div(`background:${active?'rgba(79,195,247,0.2)':'rgba(255,255,255,0.04)'};border:1px solid ${active?'rgba(79,195,247,0.4)':'rgba(255,255,255,0.06)'};border-radius:5px;padding:6px 0;margin-bottom:2px;font-size:10px;font-weight:bold;color:${active?'#4fc3f7':'#334155'};`,[active?'✓':'·']));col.appendChild(div('font-size:8px;color:#334155;',[d]));weekGrid.appendChild(col);});
+  weekWrap.appendChild(weekGrid);wrap.appendChild(weekWrap);
+
+  Object.entries(S.topics).forEach(([sem,arr])=>{
+    const {accent:a,bg,label}=SEM_META[sem];const isCurrent=sem===S.currentSem;
+    const semBox=div(`border:1px solid ${a}${isCurrent?'44':'1a'};border-radius:12px;margin-bottom:12px;overflow:hidden;`);
+    const semHdr=div(`background:linear-gradient(90deg,${bg},rgba(6,6,16,0.95));padding:11px 14px;display:flex;justify-content:space-between;align-items:center;`);
+    const semLeft=div('');
+    semLeft.appendChild(span(`color:${a};font-size:10px;letter-spacing:2px;font-weight:bold;`,label.toUpperCase()+(isCurrent?' ← CURRENT':'')));
+    semLeft.appendChild(div('font-size:9px;color:#334155;margin-top:2px;',[arr.length+' subject'+(arr.length!==1?'s':'')]));
+    const semRight=div('font-size:10px;color:#334155;',[arr.filter(t=>S.reviewed.includes(t)).length+'/'+arr.length+' reviewed']);
+    semHdr.appendChild(semLeft);semHdr.appendChild(semRight);semBox.appendChild(semHdr);
+
+    if(arr.length>0){
+      const subjectList=div('padding:10px;');
+      const visible=userPlan==='pro'?arr:arr.slice(0,FREE_TOPIC_LIMIT);
+      visible.forEach(topic=>{
+        const reviewed=S.reviewed.includes(topic);const str=S.strength[topic];
+        const card=div(`background:rgba(255,255,255,0.025);border:1px solid ${a}${reviewed?'33':'18'};border-radius:9px;padding:11px 13px;margin-bottom:7px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;`);
+        const left=div('');
+        left.appendChild(div(`font-size:12px;color:${reviewed?'#94a3b8':'#e2e8f0'};margin-bottom:2px;`,[topic]));
+        left.appendChild(div('font-size:9px;color:#334155;',[reviewed?'✓ Reviewed today':'Tap to revise']));
+        const right=div('display:flex;align-items:center;gap:6px;');
+        if(str)right.appendChild(span('font-size:12px;',str==='strong'?'💪':'📖'));
+        right.appendChild(div(`background:${a}22;border:1px solid ${a}33;color:${a};padding:4px 9px;border-radius:5px;font-size:9px;font-weight:bold;`,[reviewed?'Review →':'Study →']));
+        card.appendChild(left);card.appendChild(right);
+        card.addEventListener('click',()=>{
+          if(!S.reviewed.includes(topic)){S.reviewed.push(topic);if(S.lastStudyDate!==TODAY){S.studyDays=(S.lastStudyDate===new Date(new Date(TODAY)-86400000).toISOString().slice(0,10))?S.studyDays+1:1;S.lastStudyDate=TODAY;}}
+          S.activeTopic={topic,sem};S.screen='revision';render();
+        });
+        subjectList.appendChild(card);
+      });
+      if(userPlan!=='pro'&&arr.length>FREE_TOPIC_LIMIT){const gate=renderProGate();if(gate)subjectList.appendChild(gate);}
+      semBox.appendChild(subjectList);
+    }
+    wrap.appendChild(semBox);
+  });
+  return wrap;
+}
+
+// ─── Revision ─────────────────────────────────────────────────────────────────
+function renderRevision(){
+  const {sem,topic}=S.activeTopic;const {accent,bg}=SEM_META[sem]||SEM_META.S1;
+  const concepts=getConceptsForTopic(topic);const idx=getDailyConceptIndex(topic);const c=concepts[idx];const str=S.strength[topic];
+  const wrap=div('');
+  const topRow=div('display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;');
+  const backBtn=btn('background:none;border:1px solid rgba(79,195,247,0.2);color:#4fc3f7;border-radius:8px;padding:7px 12px;font-size:11px;cursor:pointer;font-family:Courier New,monospace;','← Back',()=>{S.screen='home';S.activeTopic=null;render();});
+  const pillRow=div('display:flex;gap:7px;');
+  pillRow.appendChild(btn(`background:${str==='strong'?'rgba(105,240,174,0.12)':'none'};border:1px solid ${str==='strong'?'#69f0ae':'rgba(255,255,255,0.12)'};color:${str==='strong'?'#69f0ae':'#64748b'};border-radius:20px;padding:5px 11px;font-size:10px;cursor:pointer;font-family:Courier New,monospace;`,'💪 Strong',()=>{S.strength[topic]='strong';render();}));
+  pillRow.appendChild(btn(`background:${str==='weak'?'rgba(255,82,82,0.12)':'none'};border:1px solid ${str==='weak'?'#ff8a80':'rgba(255,255,255,0.12)'};color:${str==='weak'?'#ff8a80':'#64748b'};border-radius:20px;padding:5px 11px;font-size:10px;cursor:pointer;font-family:Courier New,monospace;`,'📖 Needs Work',()=>{S.strength[topic]='weak';render();}));
+  topRow.appendChild(backBtn);topRow.appendChild(pillRow);wrap.appendChild(topRow);
+
+  const semLine=div('');semLine.innerHTML=`<span style="font-size:9px;color:${accent};letter-spacing:3px;">${SEM_META[sem].label.toUpperCase()} · DAILY REVISION</span>`;
+  wrap.appendChild(semLine);wrap.appendChild(div('font-size:17px;font-weight:bold;margin-bottom:2px;margin-top:3px;',[topic]));
+  wrap.appendChild(div('font-size:9px;color:#334155;margin-bottom:14px;',[`Concept ${idx+1} of ${concepts.length} · rotates daily`]));
+
+  const sparkCard=div(`background:linear-gradient(145deg,${bg},rgba(6,6,16,0.9));border:1px solid ${accent}33;border-radius:12px;padding:16px;margin-bottom:10px;`);
+  sparkCard.appendChild(div(`font-size:9px;color:${accent};letter-spacing:2px;margin-bottom:8px;`,["TODAY'S FOCUS"]));
+  sparkCard.appendChild(div('font-size:14px;font-weight:bold;margin-bottom:10px;',[c.title]));
+  const sparkTxt=div(`font-size:11px;color:#94a3b8;line-height:1.7;border-left:2px solid ${accent};padding-left:10px;font-style:italic;`);sparkTxt.textContent=c.spark;sparkCard.appendChild(sparkTxt);wrap.appendChild(sparkCard);
+
+  const coreCard=div('background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:13px;margin-bottom:10px;');
+  coreCard.appendChild(div('font-size:9px;color:#4fc3f7;letter-spacing:2px;margin-bottom:8px;',['📌 KEY STUDY POINTS']));
+  c.core.forEach(p=>{const row=div('display:flex;gap:7px;margin-bottom:6px;align-items:flex-start;');row.appendChild(span(`color:${accent};font-size:9px;margin-top:3px;flex-shrink:0;`,'▸'));row.appendChild(span('font-size:11px;color:#cbd5e1;line-height:1.6;',p));coreCard.appendChild(row);});
+  wrap.appendChild(coreCard);
+
+  const rwCard=div('background:rgba(105,240,174,0.04);border:1px solid rgba(105,240,174,0.15);border-radius:10px;padding:13px;margin-bottom:10px;');
+  rwCard.appendChild(div('font-size:9px;color:#69f0ae;letter-spacing:2px;margin-bottom:7px;',['🌍 REAL-WORLD APPLICATION']));
+  const rwTxt=div('font-size:11px;color:#cbd5e1;line-height:1.7;');rwTxt.textContent=c.realWorld;rwCard.appendChild(rwTxt);wrap.appendChild(rwCard);
+
+  const ivCard=div('background:rgba(255,183,77,0.04);border:1px solid rgba(255,183,77,0.15);border-radius:10px;padding:13px;margin-bottom:10px;');
+  ivCard.appendChild(div('font-size:9px;color:#ffb74d;letter-spacing:2px;margin-bottom:7px;',['💼 EXAM & INTERVIEW TIP']));
+  const ivTxt=div('font-size:11px;color:#cbd5e1;line-height:1.7;');ivTxt.textContent=c.interview;ivCard.appendChild(ivTxt);wrap.appendChild(ivCard);
+
+  const mkCard=div('background:rgba(206,147,216,0.04);border:1px solid rgba(206,147,216,0.15);border-radius:10px;padding:13px;margin-bottom:14px;');
+  mkCard.appendChild(div('font-size:9px;color:#ce93d8;letter-spacing:2px;margin-bottom:7px;',['📈 CAREER & INDUSTRY']));
+  const mkTxt=div('font-size:11px;color:#cbd5e1;line-height:1.7;');mkTxt.textContent=c.market;mkCard.appendChild(mkTxt);wrap.appendChild(mkCard);
+
+  wrap.appendChild(btn(`background:${accent}22;border:1px solid ${accent}55;color:${accent};border-radius:9px;padding:13px;font-size:12px;width:100%;cursor:pointer;font-family:Courier New,monospace;font-weight:bold;`,'🧠 Quick Quiz on '+topic,()=>{S.activeQuiz={topic,sem};S.quizState={questions:getQuiz(topic),current:0,selected:null,answered:false,score:0,answers:[],finished:false};S.screen='quizrun';render();}));
+  return wrap;
+}
+
+// ─── Quiz Run ─────────────────────────────────────────────────────────────────
+function renderQuizRun(){
+  const {topic,sem}=S.activeQuiz;const {accent,bg}=SEM_META[sem]||SEM_META.S1;const qs=S.quizState;
+  const wrap=div('');
+  wrap.appendChild(btn('background:none;border:1px solid rgba(79,195,247,0.2);color:#4fc3f7;border-radius:8px;padding:7px 12px;font-size:11px;cursor:pointer;font-family:Courier New,monospace;margin-bottom:14px;','← Quiz List',()=>{S.screen='quiz';S.activeQuiz=null;S.quizState=null;render();}));
+
+  if(qs.finished){
+    const pct=Math.round((qs.score/qs.questions.length)*100);const grade=qs.score>=4?'#69f0ae':qs.score>=3?'#ffb74d':'#ff8a80';const lbl=qs.score>=4?'Excellent! 🎉':qs.score>=3?'Good Work 👍':'Keep Revising 📖';
+    const res=div(`background:linear-gradient(145deg,${bg},rgba(6,6,16,0.9));border:1px solid ${accent}44;border-radius:14px;padding:22px;text-align:center;margin-bottom:14px;`);
+    res.innerHTML=`<div style="font-size:36px;margin-bottom:10px;">${qs.score>=4?'🏆':qs.score>=3?'⭐':'📚'}</div><div style="color:${grade};font-size:26px;font-weight:bold;margin-bottom:3px;">${qs.score}/${qs.questions.length}</div><div style="color:${grade};font-size:13px;margin-bottom:6px;">${lbl}</div><div style="color:#475569;font-size:11px;">${pct}% correct</div>`;
+    wrap.appendChild(res);
+    const reviewBox=div('background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:10px;padding:13px;margin-bottom:14px;');
+    reviewBox.appendChild(div('color:#475569;font-size:9px;letter-spacing:3px;text-transform:uppercase;margin-bottom:8px;',['ANSWER REVIEW']));
+    qs.questions.forEach((q,i)=>{const a=qs.answers[i];const item=div('padding:9px 0;border-bottom:1px solid rgba(255,255,255,0.05);');item.appendChild(div('font-size:11px;color:#cbd5e1;margin-bottom:5px;',[`Q${i+1}: ${q.q}`]));item.appendChild(div('font-size:10px;color:#69f0ae;',[`✓ ${q.options[q.ans]}`]));if(!a.correct)item.appendChild(div('font-size:10px;color:#ff8a80;margin-top:2px;',[`✗ Your answer: ${q.options[a.selected]}`]));reviewBox.appendChild(item);});
+    wrap.appendChild(reviewBox);
+    wrap.appendChild(btn(`background:${grade}22;border:1px solid ${grade}55;color:${grade};border-radius:9px;padding:12px;font-size:12px;width:100%;cursor:pointer;font-family:Courier New,monospace;font-weight:bold;`,'← Back to Quiz List',()=>{S.screen='quiz';S.activeQuiz=null;S.quizState=null;render();}));
+    return wrap;
+  }
+
+  const q=qs.questions[qs.current];
+  const topRow=div('display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;');
+  topRow.appendChild(span(`color:${accent};font-size:9px;letter-spacing:2px;`,`QUESTION ${qs.current+1} OF ${qs.questions.length}`));
+  topRow.appendChild(span('color:#475569;font-size:10px;',`Score: ${qs.score}/${qs.current}`));
+  wrap.appendChild(topRow);
+  const progWrap=div('background:rgba(255,255,255,0.06);border-radius:3px;height:4px;margin-bottom:18px;');
+  progWrap.appendChild(div(`background:${accent};height:100%;border-radius:3px;width:${(qs.current/qs.questions.length)*100}%;`));
+  wrap.appendChild(progWrap);
+  const qCard=div(`background:linear-gradient(145deg,${bg},rgba(6,6,16,0.9));border:1px solid ${accent}33;border-radius:12px;padding:16px;margin-bottom:16px;`);
+  qCard.appendChild(div('font-size:13px;color:#e2e8f0;line-height:1.6;',[q.q]));
+  wrap.appendChild(qCard);
+  q.options.forEach((opt,idx)=>{
+    let bgC='rgba(255,255,255,0.04)',borC='rgba(255,255,255,0.08)',colC='#94a3b8';
+    if(qs.answered){if(idx===q.ans){bgC='rgba(105,240,174,0.12)';borC='#69f0ae55';colC='#69f0ae';}else if(idx===qs.selected){bgC='rgba(255,82,82,0.1)';borC='#ff525244';colC='#ff8a80';}}
+    const b=div(`background:${bgC};border:1px solid ${borC};color:${colC};border-radius:9px;padding:11px 13px;cursor:pointer;display:flex;align-items:center;gap:9px;width:100%;margin-bottom:8px;font-size:12px;`);
+    const circle=div(`width:21px;height:21px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:9px;flex-shrink:0;border:1px solid ${colC}44;background:${colC}11;`);
+    circle.textContent=qs.answered?(idx===q.ans?'✓':idx===qs.selected?'✗':String.fromCharCode(65+idx)):String.fromCharCode(65+idx);
+    b.appendChild(circle);b.appendChild(document.createTextNode(opt));
+    if(!qs.answered){b.addEventListener('click',()=>{const correct=idx===q.ans;S.quizState.selected=idx;S.quizState.answered=true;if(correct)S.quizState.score++;S.quizState.answers.push({selected:idx,correct});render();});}
+    wrap.appendChild(b);
+  });
+  if(qs.answered){
+    wrap.appendChild(btn(`background:${accent}22;border:1px solid ${accent}55;color:${accent};border-radius:9px;padding:12px;font-size:12px;width:100%;cursor:pointer;font-family:Courier New,monospace;font-weight:bold;margin-top:4px;`,qs.current+1>=qs.questions.length?'See Results →':'Next Question →',()=>{if(qs.current+1>=qs.questions.length){S.quizState.finished=true;S.quizScores[topic]={score:qs.score,date:new Date().toISOString().slice(0,10)};}else{S.quizState.current++;S.quizState.selected=null;S.quizState.answered=false;}render();}));
+  }
+  return wrap;
+}
+
+// ─── Quiz List ─────────────────────────────────────────────────────────────────
+function renderQuizList(){
+  const wrap=div('');
+  wrap.appendChild(div('color:#475569;font-size:9px;letter-spacing:3px;text-transform:uppercase;margin-bottom:6px;',['DAILY QUIZZES']));
+  wrap.appendChild(div('font-size:17px;font-weight:bold;margin-bottom:5px;',['Test Yourself 🧠']));
+  wrap.appendChild(div('font-size:11px;color:#475569;margin-bottom:18px;',['Tap a semester to expand, then choose a topic.']));
+  Object.entries(S.topics).forEach(([sem,arr])=>{
+    if(!arr.length)return;
+    const {accent,label}=SEM_META[sem];const expanded=S.expandedSem===sem;
+    const done=arr.filter(t=>S.quizScores[t]).length;
+    const semWrap=div('margin-bottom:12px;');
+    const header=div(`display:flex;justify-content:space-between;align-items:center;border-radius:9px;padding:11px 13px;cursor:pointer;border:1px solid ${accent}33;background:rgba(255,255,255,0.04);margin-bottom:${expanded?8:0}px;`);
+    const left=div('');left.appendChild(span(`color:${accent};font-size:10px;letter-spacing:2px;font-weight:bold;`,label.toUpperCase()));left.appendChild(span('color:#475569;font-size:9px;margin-left:8px;',arr.length+' topics'));
+    const right=div('display:flex;align-items:center;gap:7px;');right.appendChild(span('color:#69f0ae;font-size:9px;',`${done}/${arr.length} done`));right.appendChild(span(`color:${accent};font-size:11px;display:inline-block;transform:${expanded?'rotate(90deg)':'rotate(0)'};`,'▶'));
+    header.appendChild(left);header.appendChild(right);header.addEventListener('click',()=>{S.expandedSem=expanded?null:sem;render();});semWrap.appendChild(header);
+    if(expanded){
+      const visibleArr=userPlan==='pro'?arr:arr.slice(0,FREE_TOPIC_LIMIT);
+      visibleArr.forEach(t=>{
+        const qs=S.quizScores[t];const col=qs?.score>=4?'#69f0ae':qs?.score>=3?'#ffb74d':qs?'#ff8a80':accent;
+        const row=div(`border-radius:8px;padding:10px 13px;margin-bottom:6px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;border:1px solid ${accent}22;background:rgba(255,255,255,0.025);`);
+        const left2=div('');left2.appendChild(div('font-size:13px;color:#e2e8f0;margin-bottom:2px;',[t]));left2.appendChild(div('font-size:9px;color:#475569;',[qs?`Last: ${qs.date}`:'Not attempted']));
+        const right2=div('display:flex;align-items:center;gap:8px;');if(qs)right2.appendChild(span(`font-size:12px;color:${col};font-weight:bold;`,`${qs.score}/5`));right2.appendChild(div(`background:${accent}22;border:1px solid ${accent}44;color:${accent};padding:4px 9px;border-radius:5px;font-size:10px;font-weight:bold;`,['Start →']));
+        row.appendChild(left2);row.appendChild(right2);
+        row.addEventListener('click',()=>{S.activeQuiz={topic:t,sem};S.quizState={questions:getQuiz(t),current:0,selected:null,answered:false,score:0,answers:[],finished:false};S.screen='quizrun';render();});
+        semWrap.appendChild(row);
+      });
+      if(userPlan!=='pro'&&arr.length>FREE_TOPIC_LIMIT){const gate=renderProGate();if(gate)semWrap.appendChild(gate);}
+    }
+    wrap.appendChild(semWrap);
+  });
+  return wrap;
+}
+
+// ─── Progress ─────────────────────────────────────────────────────────────────
+function renderProgress(){
+  const allTopics=Object.values(S.topics).flat();const weakT=allTopics.filter(t=>S.strength[t]==='weak');
+  const wrap=div('');
+  wrap.appendChild(div('color:#475569;font-size:9px;letter-spacing:3px;text-transform:uppercase;margin-bottom:6px;',['STATISTICS']));
+  wrap.appendChild(div('font-size:17px;font-weight:bold;margin-bottom:14px;',['Your Progress 📊']));
+  const statGrid=div('display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:14px;');
+  [{l:'Streak',v:S.studyDays+'d',c:'#ffb74d'},{l:'Reviewed',v:S.reviewed.length,c:'#4fc3f7'},{l:'Quizzed',v:Object.keys(S.quizScores).length,c:'#69f0ae'}].forEach(s=>{const card=div(`background:rgba(255,255,255,0.04);border:1px solid ${s.c}22;border-radius:9px;padding:11px;text-align:center;`);card.appendChild(div(`font-size:20px;font-weight:bold;color:${s.c};`,[String(s.v)]));card.appendChild(div('font-size:8px;color:#475569;letter-spacing:2px;margin-top:3px;',[s.l.toUpperCase()]));statGrid.appendChild(card);});
+  wrap.appendChild(statGrid);
+  const semBox=div('background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:10px;padding:13px;margin-bottom:12px;');
+  semBox.appendChild(div('color:#475569;font-size:9px;letter-spacing:3px;text-transform:uppercase;margin-bottom:10px;',['COVERAGE BY SEMESTER']));
+  Object.entries(S.topics).forEach(([sem,arr])=>{const {accent,label}=SEM_META[sem];const done=arr.filter(t=>S.reviewed.includes(t)).length;const pct=arr.length?Math.round((done/arr.length)*100):0;const row=div('margin-bottom:10px;');const head=div('display:flex;justify-content:space-between;margin-bottom:4px;');head.appendChild(span(`color:${accent};font-size:11px;`,label));head.appendChild(span('color:#475569;font-size:11px;',`${done}/${arr.length} · ${pct}%`));row.appendChild(head);const barWrap=div('background:rgba(255,255,255,0.06);border-radius:3px;height:5px;');barWrap.appendChild(div(`background:${accent};width:${pct}%;height:100%;border-radius:3px;`));row.appendChild(barWrap);semBox.appendChild(row);});
+  wrap.appendChild(semBox);
+  if(weakT.length){const wkBox=div('background:rgba(255,82,82,0.04);border:1px solid rgba(255,82,82,0.14);border-radius:10px;padding:12px;');wkBox.appendChild(div('color:#ff8a80;font-size:9px;letter-spacing:3px;text-transform:uppercase;margin-bottom:8px;',['NEEDS MORE REVISION']));const chips=div('display:flex;flex-wrap:wrap;gap:6px;');weakT.forEach(t=>chips.appendChild(div('background:rgba(255,82,82,0.07);border:1px solid rgba(255,82,82,0.2);color:#ff8a80;padding:4px 9px;border-radius:5px;font-size:10px;',[t])));wkBox.appendChild(chips);wrap.appendChild(wkBox);}
+  return wrap;
+}
+
+// ─── Topics Manager ───────────────────────────────────────────────────────────
+function renderTopicsMgr(){
+  const wrap=div('');
+  wrap.appendChild(div('color:#475569;font-size:9px;letter-spacing:3px;text-transform:uppercase;margin-bottom:6px;',['TOPIC MANAGER']));
+  wrap.appendChild(div('font-size:17px;font-weight:bold;margin-bottom:4px;',['My Subjects ✏️']));
+  wrap.appendChild(div('font-size:10px;color:#475569;margin-bottom:14px;',['Add or remove subjects per semester. Works for any degree or course!']));
+
+  // Add subject form
+  const addBox=div('background:rgba(255,255,255,0.03);border:1px solid rgba(79,195,247,0.15);border-radius:11px;padding:14px;margin-bottom:14px;');
+  addBox.appendChild(div('color:#475569;font-size:9px;letter-spacing:3px;text-transform:uppercase;margin-bottom:10px;',['ADD SUBJECT']));
+  const semSelect=div('display:flex;gap:6px;overflow-x:auto;padding-bottom:4px;margin-bottom:10px;');
+  ['S1','S2','S3','S4','S5','S6','S7','S8'].forEach(s=>{
+    const {accent}=SEM_META[s];const active=S.obActiveSem===s;
+    const b=btn(`background:${active?accent+'22':'rgba(255,255,255,0.04)'};border:1px solid ${active?accent+'55':'rgba(255,255,255,0.08)'};color:${active?accent:'#64748b'};border-radius:20px;padding:5px 12px;font-size:9px;cursor:pointer;font-family:Courier New,monospace;flex-shrink:0;`,s,()=>{S.obActiveSem=s;render();});
+    semSelect.appendChild(b);
+  });
+  addBox.appendChild(semSelect);
+  const inputRow=div('display:flex;gap:8px;');
+  const inp=h('input',{type:'text',placeholder:'Subject name...'});
+  inp.value=S.obInput;inp.addEventListener('input',e=>S.obInput=e.target.value);
+  inp.addEventListener('keydown',e=>{if(e.key==='Enter'&&S.obInput.trim()){S.topics[S.obActiveSem].push(S.obInput.trim());S.obInput='';render();}});
+  const addBtn=btn('background:rgba(105,240,174,0.1);border:1px solid rgba(105,240,174,0.3);color:#69f0ae;border-radius:8px;padding:9px 14px;font-size:12px;cursor:pointer;font-family:Courier New,monospace;white-space:nowrap;','+ Add',()=>{if(S.obInput.trim()){S.topics[S.obActiveSem].push(S.obInput.trim());S.obInput='';render();}});
+  inputRow.appendChild(inp);inputRow.appendChild(addBtn);addBox.appendChild(inputRow);
+  wrap.appendChild(addBox);
+
+  Object.entries(S.topics).forEach(([sem,arr])=>{
+    const {accent,label}=SEM_META[sem];
+    const box=div(`background:rgba(255,255,255,0.03);border:1px solid ${accent}22;border-radius:10px;padding:12px 14px;margin-bottom:9px;`);
+    box.appendChild(div(`color:${accent};font-size:9px;letter-spacing:2px;margin-bottom:9px;`,[label.toUpperCase()+' · '+arr.length+' SUBJECT'+(arr.length!==1?'S':'')]));
+    if(arr.length===0){box.appendChild(div('font-size:10px;color:#334155;padding:4px 0;',['No subjects added yet.']));}
+    else{arr.forEach((t,i)=>{const row=div('display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid rgba(255,255,255,0.04);');const info=div('flex:1;');info.appendChild(span('font-size:11px;color:#cbd5e1;',t));if(S.strength[t])info.appendChild(span('font-size:10px;margin-left:7px;',S.strength[t]==='strong'?'💪':'📖'));const rmBtn=btn('background:none;border:none;color:rgba(255,82,82,0.5);cursor:pointer;font-size:16px;padding:0 3px;font-family:Courier New,monospace;','×',()=>{if(confirm('Remove "'+t+'" from '+label+'?')){S.topics[sem].splice(i,1);render();}});row.appendChild(info);row.appendChild(rmBtn);box.appendChild(row);});}
+    wrap.appendChild(box);
+  });
+  return wrap;
+}
+
+// ─── Settings ─────────────────────────────────────────────────────────────────
+function renderSettings(){
+  const wrap=div('');
+  wrap.appendChild(div('color:#475569;font-size:9px;letter-spacing:3px;text-transform:uppercase;margin-bottom:6px;',['ACCOUNT']));
+  wrap.appendChild(div('font-size:17px;font-weight:bold;margin-bottom:16px;',['Settings ⚙️']));
+
+  const profBox=div('background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:11px;padding:16px;margin-bottom:12px;');
+  profBox.appendChild(div('color:#475569;font-size:9px;letter-spacing:3px;text-transform:uppercase;margin-bottom:10px;',['PROFILE']));
+  const n1=div('font-size:12px;color:#e2e8f0;margin-bottom:6px;');n1.innerHTML=`Name: <span style="color:#4fc3f7">${S.name||'Student'}</span>`;
+  const n2=div('font-size:12px;color:#e2e8f0;margin-bottom:14px;');n2.innerHTML=`Email: <span style="color:#4fc3f7">${currentUser?.email||'—'}</span>`;
+  profBox.appendChild(n1);profBox.appendChild(n2);
+  profBox.appendChild(btn('background:rgba(255,82,82,0.08);border:1px solid rgba(255,82,82,0.2);color:rgba(255,82,82,0.7);border-radius:8px;padding:10px;font-size:11px;width:100%;cursor:pointer;font-family:Courier New,monospace;','Sign Out',()=>{currentUser=null;userPlan='free';render();}));
+  wrap.appendChild(profBox);
+
+  if(userPlan!=='pro'){
+    const upBox=div('background:linear-gradient(145deg,rgba(255,183,77,0.08),rgba(6,6,16,0.95));border:1px solid rgba(255,183,77,0.3);border-radius:14px;padding:20px;text-align:center;margin-bottom:12px;');
+    upBox.innerHTML=`
+      <div style="font-size:22px;margin-bottom:8px;">⚡</div>
+      <div style="font-size:16px;font-weight:bold;margin-bottom:8px;color:#ffb74d;">Upgrade to Pro</div>
+      <div style="font-size:11px;color:#94a3b8;line-height:1.7;margin-bottom:14px;">Unlimited topics · Full quiz banks<br>Streak tracking · Priority support</div>
+      <div style="font-size:20px;color:#ffb74d;font-weight:bold;margin-bottom:14px;">$4.99 / month</div>
+      <button onclick="goUpgrade()" style="background:rgba(255,183,77,0.2);border:1px solid rgba(255,183,77,0.5);color:#ffb74d;border-radius:9px;padding:12px 24px;font-size:13px;cursor:pointer;font-family:Courier New,monospace;font-weight:bold;width:100%;">Upgrade Now →</button>
+    `;
+    wrap.appendChild(upBox);
+  }
+
+  const resetBox=div('background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:11px;padding:16px;');
+  resetBox.appendChild(div('color:#475569;font-size:9px;letter-spacing:3px;text-transform:uppercase;margin-bottom:10px;',['DANGER ZONE']));
+  resetBox.appendChild(btn('background:rgba(255,82,82,0.08);border:1px solid rgba(255,82,82,0.2);color:rgba(255,82,82,0.7);border-radius:8px;padding:10px;font-size:11px;width:100%;cursor:pointer;font-family:Courier New,monospace;','⚠️ Reset All Data',()=>{if(confirm('Reset all data and start over?')){if(currentUser&&currentUser.id!=='guest')localStorage.removeItem(STORE_KEY+'_'+currentUser.id);const fresh=defaultState();Object.assign(S,fresh);render();}}));
+  wrap.appendChild(resetBox);
+  return wrap;
+}
+
+// ─── Boot ─────────────────────────────────────────────────────────────────────
+function boot(){
+  // Check if user was previously signed in (session persistence)
+  try{
+    const raw=localStorage.getItem(STORE_KEY);
+    if(raw){
+      const saved=JSON.parse(raw);
+      if(saved._uid&&saved._uid!=='guest'){
+        const users=getUsers();
+        const userEntry=Object.values(users).find(u=>u.uid===saved._uid);
+        if(userEntry){
+          currentUser={id:userEntry.uid,email:userEntry.email,name:userEntry.name,plan:userEntry.plan||'free'};
+          userPlan=currentUser.plan;
+          // Load user-specific state
+          const userRaw=localStorage.getItem(STORE_KEY+'_'+currentUser.id);
+          if(userRaw){try{const us=JSON.parse(userRaw);Object.assign(S,us);S.activeTopic=null;S.activeQuiz=null;S.quizState=null;}catch(e){}}
+          if(S.screen==='onboarding'&&S.name)S.screen='home';
+        }
+      }
+    }
+  }catch(e){}
+  render();
+}
+
+boot();
+</script>
+</body>
+</html>
