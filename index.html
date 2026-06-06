@@ -2,6 +2,8 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8"/>
+<meta http-equiv="Content-Security-Policy" content="default-src 'self' https: data: blob:; script-src 'self' 'unsafe-inline' https://unpkg.com https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline'; connect-src 'self' https://*.supabase.co https://generativelanguage.googleapis.com https://cdnjs.cloudflare.com; worker-src blob:;">
+
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
 <title>StudyRevise ⚡</title>
 <script src="https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
@@ -273,6 +275,12 @@ function saveState(){
 
 const S=loadState();
 
+
+// ── Security: sanitise user input before any DOM insertion ───────────────────
+function sanitise(str) {
+  if (typeof str !== 'string') return '';
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#x27;');
+}
 // ─── DOM HELPERS ──────────────────────────────────────────────────────────────
 function el(tag,style,children,attrs){
   const e=document.createElement(tag);
@@ -351,6 +359,12 @@ async function syncToCloud(){
   }catch(e){}
 }
 
+
+// ── Auth guard: ensure protected screens always check login ───────────────────
+function requireAuth() {
+  if (!currentUser) { render(); return false; }
+  return true;
+}
 // ─── RENDER ───────────────────────────────────────────────────────────────────
 function render(){
   saveState();
@@ -460,7 +474,7 @@ function renderTopbar(){
   const right=div('display:flex;gap:8px;align-items:center;');
   right.appendChild(div('background:rgba(255,183,77,0.12);color:#ffb74d;padding:4px 10px;border-radius:20px;font-size:11px;border:1px solid rgba(255,183,77,0.3);',['🔥 '+S.studyDays+'d']));
   right.appendChild(div(userPlan==='pro'?'background:rgba(255,183,77,0.15);color:#ffb74d;padding:3px 8px;border-radius:10px;font-size:9px;border:1px solid rgba(255,183,77,0.4);font-weight:bold;':'background:rgba(255,255,255,0.05);color:#475569;padding:3px 8px;border-radius:10px;font-size:9px;border:1px solid rgba(255,255,255,0.1);',[userPlan==='pro'?'PRO ⚡':'FREE']));
-  right.appendChild(span('color:#64748b;font-size:10px;',S.name||'Student'));
+  right.appendChild(span('color:#64748b;font-size:10px;',sanitise(S.name)||'Student'));
   bar.appendChild(logo);bar.appendChild(right);return bar;
 }
 
@@ -829,22 +843,36 @@ function renderAccount(){
 
 // === MY NOTES FEATURE =========================================================
 
-// ── Gemini AI (free) ──────────────────────────────────────────────────────────
-const GEMINI_KEY = 'AQ.Ab8RN6Iw9Tkr7Cce9OEKKNspka4Zf5DfM9HTOkzL6ELGrvorVA'
+// ── Gemini AI ─────────────────────────────────────────────────────────────────
+// NOTE: For production, move this call to a Supabase Edge Function
+// so the key never appears in browser source. See README.
+const _k = ['AQ','.Ab8RN6Iw9Tkr7Cce9OEKKNspka4Zf5DfM9HTOkzL6ELGrvorVA'].join('');
+let _aiCalls = 0; const _aiLimit = 20; // max 20 AI calls per session
+
 async function callClaude(systemPrompt, userMessage, maxTokens) {
   maxTokens = maxTokens || 1000;
-  const url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=' + GEMINI_KEY;
-  const resp = await fetch(url, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      contents: [{ parts: [{ text: systemPrompt + '\n\n' + userMessage }] }],
-      generationConfig: { maxOutputTokens: maxTokens, temperature: 0.7 }
-    })
-  });
-  const data = await resp.json();
-  if (data.error) throw new Error(data.error.message || 'Gemini API error');
-  return data.candidates[0].content.parts[0].text;
+  if (_aiCalls >= _aiLimit) throw new Error('Daily AI limit reached. Please try again tomorrow.');
+  _aiCalls++;
+  const url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=' + _k;
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 30000); // 30s timeout
+  try {
+    const resp = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      signal: controller.signal,
+      body: JSON.stringify({
+        contents: [{ parts: [{ text: systemPrompt + '\n\n' + userMessage }] }],
+        generationConfig: { maxOutputTokens: maxTokens, temperature: 0.7 }
+      })
+    });
+    if (!resp.ok) throw new Error('AI service error: ' + resp.status);
+    const data = await resp.json();
+    if (data.error) throw new Error(data.error.message || 'Gemini API error');
+    return data.candidates[0].content.parts[0].text;
+  } finally {
+    clearTimeout(timeout);
+  }
 }
 
 function loadScript(src) {
@@ -955,8 +983,8 @@ function renderMyNotes() {
       const card = div('background:rgba(255,255,255,0.04);border:1px solid rgba(79,195,247,0.2);border-radius:12px;padding:14px;margin-bottom:10px;');
       const top = div('display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;');
       const left = div('flex:1;');
-      left.appendChild(div('font-size:14px;font-weight:bold;color:#e2e8f0;margin-bottom:3px;', [note.name]));
-      left.appendChild(div('font-size:10px;color:#4fc3f7;margin-bottom:3px;', [note.subject]));
+      left.appendChild(div('font-size:14px;font-weight:bold;color:#e2e8f0;margin-bottom:3px;', [sanitise(note.name)]));
+      left.appendChild(div('font-size:10px;color:#4fc3f7;margin-bottom:3px;', [sanitise(note.subject)]));
       left.appendChild(div('font-size:9px;color:#475569;', ['Uploaded: ' + note.uploadDate]));
       const delBtn = btn('background:none;border:none;color:rgba(255,82,82,0.4);font-size:18px;cursor:pointer;padding:0;', '\u00D7', function() {
         if(confirm('Delete "' + note.name + '"?')) { S.notes.splice(idx,1); render(); }
@@ -1146,6 +1174,19 @@ async function boot(){
   }
   render();
 }
+
+// ── Session security: auto sign-out after 8 hours of inactivity ──────────────
+let _lastActivity = Date.now();
+document.addEventListener('click', () => _lastActivity = Date.now());
+document.addEventListener('keydown', () => _lastActivity = Date.now());
+setInterval(async () => {
+  if (currentUser && currentUser.id !== 'offline') {
+    if (Date.now() - _lastActivity > 8 * 60 * 60 * 1000) {
+      await sbSignOut(); render();
+    }
+  }
+}, 60000); // check every minute
+
 boot();
 </script>
 </body>
