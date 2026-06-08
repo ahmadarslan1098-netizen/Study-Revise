@@ -2,14 +2,26 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8"/>
-<meta http-equiv="Content-Security-Policy" content="default-src 'self' https: data: blob:; script-src 'self' 'unsafe-inline' https://unpkg.com https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline'; connect-src 'self' https://*.supabase.co https://generativelanguage.googleapis.com https://cdnjs.cloudflare.com; worker-src blob:;">
-
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
 <title>StudyRevise ⚡</title>
-<script src="https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script>
+// Load Supabase with fallback CDN
+(function(){
+  function loadSB(src, fallback){
+    const s = document.createElement('script');
+    s.src = src;
+    s.onerror = function(){ if(fallback){ loadSB(fallback, null); } };
+    document.head.appendChild(s);
+  }
+  loadSB(
+    'https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.js',
+    'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js'
+  );
+})();
+</script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
-html,body{height:100%;background:#060610;font-family:'Courier New',monospace;color:#e2e8f0;overflow-x:hidden;}
+html,body{height:100%;background:#0a0f1e;font-family:'Courier New',monospace;color:#e2e8f0;overflow-x:hidden;}
 #app{max-width:480px;margin:0 auto;min-height:100vh;background:linear-gradient(160deg,#060610 0%,#0a0d1a 60%,#060610 100%);}
 input[type=text],input[type=email],input[type=password]{background:rgba(255,255,255,0.05);border:1px solid rgba(79,195,247,0.25);border-radius:8px;padding:11px 13px;color:#e2e8f0;font-family:'Courier New',monospace;font-size:13px;outline:none;width:100%;transition:border 0.2s;}
 input:focus{border-color:rgba(79,195,247,0.6);}
@@ -105,8 +117,7 @@ const CONCEPTS_DB = {
     {title:'Statistics — Probability', spark:'Probability turns uncertainty into mathematics. Once you can quantify chance, you can make rational decisions under any uncertain conditions.', core:['P(A or B) = P(A) + P(B) − P(A and B)','Bayes\' Theorem: P(A|B) = P(B|A)·P(A)/P(B)','Expected value = sum of (outcome × probability)','Normal distribution: 68-95-99.7 rule'], realWorld:'Insurance companies, hospitals, banks, and governments all use probability to make decisions that affect millions of people every day.', interview:'"You flip a fair coin 3 times. What is P(all heads)?" — 1/8 = 12.5%. Conditional probability follows immediately.', market:'Data scientists and actuaries (probability specialists) are among the highest-paid graduates globally in 2024.'},
   ],
   'Physics': [
-    {title:"Newton's Laws of Motion", spark:'Three sentences written in 1687 that explain how everything in the universe moves — from a falling apple to a spacecraft orbiting Mars.', core:['1st Law: An object stays at rest or constant velocity unless acted on by a net force','2nd Law: F = ma — force equals mass times acceleration','3rd Law: Every action has an equal and opposite reaction','Weight = mg where g = 9.8 m/s²'], realWorld:'Every car, plane, and rocket ever built was designed using Newton\'s Laws. Your seatbelt works because of the 1st Law — your body keeps moving when the car stops.', interview:'"A car accelerates from 0 to 60 km/h in 5 seconds. What is its acceleration?" a = Δv/t = (60/3.6)/5 = 3.33 m/s².', market:'Classical mechanics underpins all structural engineering, automotive design, and aerospace — industries employing millions globally.'},
-    {title:'Thermodynamics — Laws', spark:'The universe has rules about energy — and the second law says you can never win. You can\'t even break even. Understanding why unlocks all of engineering.', core:['1st Law: Energy is conserved — it cannot be created or destroyed','2nd Law: Entropy (disorder) always increases in a closed system','Efficiency = useful energy out / total energy in','Carnot efficiency: η = 1 − T_cold/T_hot'], realWorld:'Every power station, refrigerator, and car engine is designed around thermodynamic limits. Electric vehicles achieve ~90% efficiency vs ~25% for petrol engines.', interview:'"Why can\'t we have a 100% efficient engine?" The Second Law forbids it — some energy always becomes waste heat. Know this cold for engineering interviews.', market:'Thermodynamics knowledge is critical for the green energy transition — heat pumps, solar thermal, and hydrogen production all depend on it.'},
+    {title:"Newton's Laws of Motion", spark:'Three sentences written in 1687 that explain how everything in the universe moves — from a falling apple to a spacecraft orbiting Mars.', core:['1st Law: An object stays at rest or constant velocity unless acted on by a net force','2nd Law: F = ma — force equals mass times acceleration','3rd Law: Every action has an equal and opposite reaction','Weight = mg where g = 9.8 m/s²'], realWorld:'Every car, plane, and rocket ever built was designed using Newton\'s Laws. Your seatbelt works because of the 1st Law — your body keeps moving when the car stops.', interview:'"A car accelerates from 0 to 60 km/h in 5 seconds. What is its acceleration?" a = Δv/t = (60/3.6)/5 = 3.33 m/s².', market:'Classical mechanics underpins all structural engineering, automotive design, and aerospace — industries employing millions globally.'}, {title:'Thermodynamics — Laws', spark:'The universe has rules about energy — and the second law says you can never win. You can\'t even break even. Understanding why unlocks all of engineering.', core:['1st Law: Energy is conserved — it cannot be created or destroyed','2nd Law: Entropy (disorder) always increases in a closed system','Efficiency = useful energy out / total energy in','Carnot efficiency: η = 1 − T_cold/T_hot'], realWorld:'Every power station, refrigerator, and car engine is designed around thermodynamic limits. Electric vehicles achieve ~90% efficiency vs ~25% for petrol engines.', interview:'"Why can\'t we have a 100% efficient engine?" The Second Law forbids it — some energy always becomes waste heat. Know this cold for engineering interviews.', market:'Thermodynamics knowledge is critical for the green energy transition — heat pumps, solar thermal, and hydrogen production all depend on it.'},
   ],
   'Programming': [
     {title:'Data Structures — Arrays & Lists', spark:'An array is the simplest way to store many items — like a row of labelled boxes. Choosing the right data structure is the first step to writing fast code.', core:['Array: fixed size, O(1) access by index','Linked List: flexible size, O(n) access, O(1) insert/delete at head','Stack: LIFO — Last In First Out','Queue: FIFO — First In First Out'], realWorld:'Every app on your phone uses arrays and lists. Your music playlist is a list. Your browser history uses a stack (the back button pops the last page).', interview:'"What is the time complexity of accessing element at index i in an array?" O(1) — constant time. Then: "And in a linked list?" O(n) — must traverse from head.', market:'Data structures are tested in every major tech company interview (Google, Meta, Amazon). Mastering them is the single biggest factor in passing technical screens.'},
@@ -132,8 +143,7 @@ const CONCEPTS_DB = {
     {title:'Causes of World War I', spark:'WWI did not start because of one assassination — it ignited because of a century of accumulated tensions that turned a regional crisis into a global catastrophe killing 20 million.', core:['M.A.I.N. framework: Militarism, Alliance systems, Imperialism, Nationalism','The Alliance System turned a local conflict into a world war through chain reaction','Austria-Hungary\'s ultimatum to Serbia following Archduke Franz Ferdinand\'s assassination was the trigger','Germany\'s Schlieffen Plan demanded rapid two-front war — forcing a timeline on events'], realWorld:'Understanding WWI explains the map of the modern Middle East, the origins of WWII, and why international institutions like the UN were created.', interview:'"Was WWI inevitable?" A-grade answer: discuss long-term structural causes vs short-term triggers, then give your own reasoned conclusion with evidence.', market:'Historical analysis skills — source evaluation, constructing arguments, understanding context — are valued in law, journalism, policy-making, and management consulting.'},
   ],
   'Psychology': [
-    {title:"Freud's Psychoanalytic Theory", spark:"Like it or not, Freud changed how humanity thinks about itself. His ideas — even the wrong ones — forced us to take the unconscious mind seriously for the first time.", core:['Id: primitive instincts and drives (unconscious)','Ego: rational mediator between id, superego and reality','Superego: internalised moral standards and ideals','Defence mechanisms: repression, projection, displacement, rationalisation'], realWorld:"Psychoanalytic concepts permeate modern therapy, marketing (understanding hidden desires), literature, and film criticism.", interview:'"Evaluate Freud\'s theory." Strong answer: strengths (pioneered unconscious, inspired research), weaknesses (unscientific, not falsifiable, sample bias). Show balance.', market:'Psychology graduates work in clinical settings, HR, UX research, marketing, education, and policy — one of the most versatile degrees.'},
-  ],
+    {title:"Freud's Psychoanalytic Theory", spark:"Like it or not, Freud changed how humanity thinks about itself. His ideas — even the wrong ones — forced us to take the unconscious mind seriously for the first time.", core:['Id: primitive instincts and drives (unconscious)','Ego: rational mediator between id, superego and reality','Superego: internalised moral standards and ideals','Defence mechanisms: repression, projection, displacement, rationalisation'], realWorld:"Psychoanalytic concepts permeate modern therapy, marketing (understanding hidden desires), literature, and film criticism.", interview:'"Evaluate Freud\'s theory." Strong answer: strengths (pioneered unconscious, inspired research), weaknesses (unscientific, not falsifiable, sample bias). Show balance.', market:'Psychology graduates work in clinical settings, HR, UX research, marketing, education, and policy — one of the most versatile degrees.'}, ],
 };
 
 function getConceptsForTopic(t){ return CONCEPTS_DB[t] || getGenericConcepts(t); }
@@ -150,13 +160,11 @@ const QUIZ_DB = {
   'Mathematics':[
     {q:"What is the derivative of x³?",options:["x²","3x²","3x³","2x³"],ans:1},
     {q:"What does a determinant of zero mean for a matrix?",options:["The matrix is invertible","The matrix has no inverse","The matrix is symmetric","All eigenvalues are positive"],ans:1},
-    {q:"Bayes' Theorem is used to:",options:["Sort datasets","Update probability based on new evidence","Find matrix eigenvalues","Calculate derivatives"],ans:1},
-    {q:"The 68-95-99.7 rule applies to which distribution?",options:["Uniform","Binomial","Normal (Gaussian)","Exponential"],ans:2},
+    {q:"Bayes' Theorem is used to:",options:["Sort datasets","Update probability based on new evidence","Find matrix eigenvalues","Calculate derivatives"],ans:1}, {q:"The 68-95-99.7 rule applies to which distribution?",options:["Uniform","Binomial","Normal (Gaussian)","Exponential"],ans:2},
     {q:"Integration is the reverse of:",options:["Multiplication","Differentiation","Addition","Logarithm"],ans:1},
   ],
   'Physics':[
-    {q:"Newton's 2nd Law states F =",options:["mv","ma","mg","m/a"],ans:1},
-    {q:"The 2nd Law of Thermodynamics says entropy in a closed system:",options:["Always decreases","Stays constant","Always increases","Is zero"],ans:2},
+    {q:"Newton's 2nd Law states F =",options:["mv","ma","mg","m/a"],ans:1}, {q:"The 2nd Law of Thermodynamics says entropy in a closed system:",options:["Always decreases","Stays constant","Always increases","Is zero"],ans:2},
     {q:"Which has better energy efficiency — electric or petrol cars?",options:["Petrol (~90%)","Equal","Electric (~90%)","Depends on fuel type only"],ans:2},
     {q:"Acceleration due to gravity on Earth is approximately:",options:["9.8 m/s²","8.9 m/s²","10.8 m/s²","1 m/s²"],ans:0},
     {q:"The Carnot efficiency formula is:",options:["1 - T_hot/T_cold","T_hot - T_cold","1 - T_cold/T_hot","T_cold/T_hot"],ans:2},
@@ -164,8 +172,7 @@ const QUIZ_DB = {
   'Programming':[
     {q:"What is the time complexity of accessing index i in an array?",options:["O(n)","O(log n)","O(1)","O(n²)"],ans:2},
     {q:"Which sorting algorithm has O(n log n) time complexity?",options:["Bubble Sort","Selection Sort","Merge Sort","Insertion Sort"],ans:2},
-    {q:"In OOP, 'encapsulation' means:",options:["Inheriting from a parent class","Hiding internal data and exposing only what's needed","Having many implementations","Simplifying complex logic"],ans:1},
-    {q:"A queue follows which principle?",options:["LIFO","FIFO","Random access","Priority based"],ans:1},
+    {q:"In OOP, 'encapsulation' means:",options:["Inheriting from a parent class","Hiding internal data and exposing only what's needed","Having many implementations","Simplifying complex logic"],ans:1}, {q:"A queue follows which principle?",options:["LIFO","FIFO","Random access","Priority based"],ans:1},
     {q:"Binary search requires the data to be:",options:["Unsorted","Sorted","In a linked list","In a tree"],ans:1},
   ],
   'Economics':[
@@ -190,8 +197,7 @@ const QUIZ_DB = {
     {q:"Crediting a liability account:",options:["Decreases it","Increases it","Closes it","Has no effect"],ans:1},
   ],
   'Psychology':[
-    {q:"Freud's 'Id' represents:",options:["Moral standards","Rational thought","Primitive instincts and drives","Conscious awareness"],ans:2},
-    {q:"Which defence mechanism involves attributing your feelings to others?",options:["Repression","Displacement","Projection","Rationalisation"],ans:2},
+    {q:"Freud's 'Id' represents:",options:["Moral standards","Rational thought","Primitive instincts and drives","Conscious awareness"],ans:2}, {q:"Which defence mechanism involves attributing your feelings to others?",options:["Repression","Displacement","Projection","Rationalisation"],ans:2},
     {q:"Classical conditioning was demonstrated by:",options:["Freud","Skinner","Pavlov","Bandura"],ans:2},
     {q:"The superego represents:",options:["Unconscious desires","Logical reasoning","Internalised moral standards","Survival instincts"],ans:2},
     {q:"Cognitive behavioural therapy (CBT) focuses on changing:",options:["Unconscious drives","Thought patterns and behaviours","Childhood memories only","Brain chemistry only"],ans:1},
@@ -206,8 +212,7 @@ const QUIZ_DB = {
   'Contract Law':[
     {q:"Which of the following is NOT required for a valid contract?",options:["Offer","Acceptance","Writing (in most cases)","Consideration"],ans:2},
     {q:"An advertisement is legally classified as:",options:["A binding offer","An invitation to treat","A counter-offer","A contract"],ans:1},
-    {q:"'Consideration' in contract law means:",options:["Being polite and thoughtful","Something of value exchanged by each party","A written document","The court's deliberation"],ans:1},
-    {q:"Which case established that an advertisement is an invitation to treat?",options:["Carlill v Carbolic","Partridge v Crittenden","Donoghue v Stevenson","Balfour v Balfour"],ans:1},
+    {q:"'Consideration' in contract law means:",options:["Being polite and thoughtful","Something of value exchanged by each party","A written document","The court's deliberation"],ans:1}, {q:"Which case established that an advertisement is an invitation to treat?",options:["Carlill v Carbolic","Partridge v Crittenden","Donoghue v Stevenson","Balfour v Balfour"],ans:1},
     {q:"A minor (under 18) signing a contract makes it:",options:["Void","Voidable — minor can choose to avoid","Binding on both parties","Automatically criminal"],ans:1},
   ],
 };
@@ -275,12 +280,6 @@ function saveState(){
 
 const S=loadState();
 
-
-// ── Security: sanitise user input before any DOM insertion ───────────────────
-function sanitise(str) {
-  if (typeof str !== 'string') return '';
-  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#x27;');
-}
 // ─── DOM HELPERS ──────────────────────────────────────────────────────────────
 function el(tag,style,children,attrs){
   const e=document.createElement(tag);
@@ -310,23 +309,39 @@ function inp(type,ph,val,style){
 let sb;
 function initSupabase(){
   try{
-    const {createClient}=window.supabase||supabaseJs||{};
-    if(createClient){
-      sb=createClient(SB_URL,SB_KEY);
-      return true;
-    }
-  }catch(e){}
-  return false;
+    // Support both old (eyJ...) and new (sb_publishable_...) key formats
+    const {createClient}=window.supabase||{};
+    if(!createClient){ console.log('Supabase not loaded yet'); return false; }
+    const opts = SB_KEY.startsWith('sb_publishable_') ? {
+      auth: {
+        autoRefreshToken: true,
+        persistSession: true,
+        detectSessionInUrl: false
+      },
+      global: {
+        headers: { 'X-Supabase-Api-Key': SB_KEY }
+      }
+    } : {};
+    sb = createClient(SB_URL, SB_KEY, opts);
+    return true;
+  }catch(e){ console.log('Supabase init error:', e); return false; }
 }
 
 async function sbSignUp(email,pass){
-  if(!sb)throw new Error('Cannot connect to server. Check your internet connection.');
-  const {data,error}=await sb.auth.signUp({email,password:pass});
+  if(!sb){
+    const ok = initSupabase();
+    if(!ok) throw new Error('Cannot connect. Make sure you are online and try again.');
+  }
+  const {data,error}=await sb.auth.signUp({email,password:pass,options:{emailRedirectTo:window.location.origin}});
   if(error)throw error;
   return data;
 }
 async function sbSignIn(email,pass){
-  if(!sb)throw new Error('Cannot connect to server. Check your internet connection.');
+  if(!sb){
+    // Try reinitialising Supabase before giving up
+    const ok = initSupabase();
+    if(!ok) throw new Error('Cannot connect. Make sure you are online and try again.');
+  }
   const {data,error}=await sb.auth.signInWithPassword({email,password:pass});
   if(error)throw error;
   return data;
@@ -359,12 +374,6 @@ async function syncToCloud(){
   }catch(e){}
 }
 
-
-// ── Auth guard: ensure protected screens always check login ───────────────────
-function requireAuth() {
-  if (!currentUser) { render(); return false; }
-  return true;
-}
 // ─── RENDER ───────────────────────────────────────────────────────────────────
 function render(){
   saveState();
@@ -380,6 +389,7 @@ function render(){
   else if(S.screen==='quizrun'&&S.activeQuiz)page.appendChild(renderQuizRun());
   else if(S.screen==='revision'&&S.activeTopic)page.appendChild(renderRevision());
   else if(S.screen==='progress')page.appendChild(renderProgress());
+  else if(S.screen==='topics')page.appendChild(renderTopics());
   else if(S.screen==='subjects')page.appendChild(renderSubjects());
   else if(S.screen==='mynotes')page.appendChild(renderMyNotes());
   else if(S.screen==='notestudy')page.appendChild(renderNoteStudy());
@@ -417,7 +427,7 @@ function renderAuth(mode='login'){
   const passInp=inp('password','at least 6 characters','','margin-bottom:18px;');
   card.appendChild(passInp);
 
-  const submitBtn=btn('background:rgba(79,195,247,0.15);border:1px solid rgba(79,195,247,0.4);color:#4fc3f7;border-radius:9px;padding:13px;font-size:13px;width:100%;font-weight:bold;margin-bottom:14px;',mode==='login'?'Sign In →':'Create Free Account →',async()=>{
+  const submitBtn=btn('background:rgba(79,195,247,0.18);border:1px solid rgba(79,195,247,0.5);color:#4fc3f7;border-radius:9px;padding:13px;font-size:13px;width:100%;font-weight:bold;margin-bottom:14px;letter-spacing:0.5px;',mode==='login'?'Sign In →':'Create Free Account →',async()=>{
     const email=emailInp.value.trim();const pass=passInp.value.trim();
     if(!email||!pass){errDiv.textContent='Please fill in email and password.';errDiv.style.display='block';return;}
     if(pass.length<6){errDiv.textContent='Password must be at least 6 characters.';errDiv.style.display='block';return;}
@@ -430,10 +440,20 @@ function renderAuth(mode='login'){
       } else {
         if(nameInp&&nameInp.value.trim())S.name=nameInp.value.trim();
         const d=await sbSignUp(email,pass);
-        if(d?.user&&d.user.id){
-          currentUser=d.user;await syncToCloud();render();
-        } else if(d?.user===null){
-          okDiv.textContent='✓ Check your email and click the confirmation link, then sign in.';okDiv.style.display='block';
+        // Try immediate sign-in after signup (works when email confirm is disabled)
+        try {
+          const signInData = await sbSignIn(email, pass);
+          if(signInData?.user){
+            if(nameInp&&nameInp.value.trim())S.name=nameInp.value.trim();
+            currentUser=signInData.user;await syncToCloud();render();return;
+          }
+        } catch(signInErr) {
+          // Email confirmation required — show friendly message
+        }
+        if(d?.user){
+          okDiv.textContent='✓ Account created! Check your email for a confirmation link, then sign in below.';okDiv.style.display='block';
+          // Switch to login mode after 2 seconds
+          setTimeout(()=>{document.getElementById('app').innerHTML='';document.getElementById('app').appendChild(renderAuth('login'));},3000);
         } else {
           okDiv.textContent='Account created! Please sign in.';okDiv.style.display='block';
         }
@@ -442,7 +462,8 @@ function renderAuth(mode='login'){
       let msg=e.message||'Something went wrong.';
       if(msg.includes('fetch')||msg.includes('network')||msg.includes('connect'))msg='Cannot connect to server. Check your internet connection and try again.';
       else if(msg.includes('already registered'))msg='This email is already registered. Please sign in instead.';
-      else if(msg.includes('Invalid login'))msg='Incorrect email or password. Please try again.';
+      else if(msg.includes('Invalid login')||msg.includes('invalid_credentials'))msg='Incorrect email or password. Try again or create a new account.';
+      else if(msg.includes('Email not confirmed'))msg='Please check your email and click the confirmation link first. Check spam folder too!';
       errDiv.textContent=msg;errDiv.style.display='block';
     }
     submitBtn.textContent=mode==='login'?'Sign In →':'Create Free Account →';submitBtn.disabled=false;
@@ -456,7 +477,7 @@ function renderAuth(mode='login'){
 
   // Offline mode
   const offBtn=div('margin-top:20px;text-align:center;');
-  offBtn.appendChild(btn('background:none;border:none;color:#334155;font-size:10px;cursor:pointer;',
+  offBtn.appendChild(btn('background:none;border:none;color:#64748b;font-size:10px;cursor:pointer;',
     '▸ Continue without account (offline mode)',()=>{
       currentUser={id:'offline',email:'offline'};userPlan='free';
       if(S.screen==='onboarding'||!S.name)S.screen='onboarding';
@@ -474,20 +495,20 @@ function renderTopbar(){
   const right=div('display:flex;gap:8px;align-items:center;');
   right.appendChild(div('background:rgba(255,183,77,0.12);color:#ffb74d;padding:4px 10px;border-radius:20px;font-size:11px;border:1px solid rgba(255,183,77,0.3);',['🔥 '+S.studyDays+'d']));
   right.appendChild(div(userPlan==='pro'?'background:rgba(255,183,77,0.15);color:#ffb74d;padding:3px 8px;border-radius:10px;font-size:9px;border:1px solid rgba(255,183,77,0.4);font-weight:bold;':'background:rgba(255,255,255,0.05);color:#475569;padding:3px 8px;border-radius:10px;font-size:9px;border:1px solid rgba(255,255,255,0.1);',[userPlan==='pro'?'PRO ⚡':'FREE']));
-  right.appendChild(span('color:#64748b;font-size:10px;',sanitise(S.name)||'Student'));
+  right.appendChild(span('color:#64748b;font-size:10px;',S.name||'Student'));
   bar.appendChild(logo);bar.appendChild(right);return bar;
 }
 
 // ─── BOTTOM NAV ───────────────────────────────────────────────────────────────
 function renderNav(){
-  const NAV=[{id:'home',icon:'🏠',label:'TODAY'},{id:'quiz',icon:'🧠',label:'QUIZ'},{id:'mynotes',icon:'📄',label:'MY NOTES'},{id:'progress',icon:'📊',label:'STATS'},{id:'account',icon:'⚙️',label:'ACCOUNT'}];
+  const NAV=[{id:'home',icon:'🏠',label:'TODAY'},{id:'quiz',icon:'🧠',label:'QUIZ'},{id:'topics',icon:'📚',label:'TOPICS'},{id:'progress',icon:'📊',label:'STATS'},{id:'account',icon:'⚙️',label:'ACCOUNT'}];
   const nav=div('position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;background:rgba(6,6,16,0.97);border-top:1px solid rgba(79,195,247,0.12);display:flex;justify-content:space-around;padding:8px 0 12px;z-index:100;');
   NAV.forEach(n=>{
     const b=div('display:flex;flex-direction:column;align-items:center;gap:2px;padding:0 8px;cursor:pointer;min-width:48px;');
     b.appendChild(div('font-size:18px;text-align:center;',[n.icon]));
     b.appendChild(span('font-size:8px;letter-spacing:1px;color:'+(S.screen===n.id?'#4fc3f7':'#475569'),n.label));
     if(S.screen===n.id)b.appendChild(div('width:3px;height:3px;background:#4fc3f7;border-radius:50%;margin:1px auto 0;'));
-    b.onclick=()=>{S.screen=n.id;S.activeTopic=null;S.activeQuiz=null;S.quizState=null;render();};
+    b.onclick=()=>{S.screen=n.id;S.activeTopic=null;S.activeQuiz=null;S.quizState=null;S.noteQuiz=null;render();};
     nav.appendChild(b);
   });
   return nav;
@@ -558,7 +579,18 @@ function renderOnboarding(){
         });
         chips.appendChild(b);
       });
-      body.appendChild(chips);box.appendChild(hdr);box.appendChild(body);card.appendChild(box);
+      // Custom subject input per field in onboarding
+    const customRow=div('display:flex;gap:7px;margin-top:8px;');
+    const customInp=document.createElement('input');
+    customInp.type='text';customInp.placeholder='Add your own subject...';
+    customInp.style.cssText='background:rgba(255,255,255,0.05);border:1px solid rgba(79,195,247,0.2);border-radius:8px;padding:8px 11px;color:#e2e8f0;font-family:Courier New,monospace;font-size:11px;outline:none;flex:1;';
+    const addBtn=btn('background:rgba(79,195,247,0.12);border:1px solid rgba(79,195,247,0.3);color:#4fc3f7;border-radius:8px;padding:8px 12px;font-size:11px;white-space:nowrap;','+ Add',function(){
+      const val=customInp.value.trim();
+      if(val){if(!S.subjects[field])S.subjects[field]=[];if(!S.subjects[field].includes(val)){S.subjects[field].push(val);}customInp.value='';render();}
+    });
+    customInp.addEventListener('keydown',function(e){if(e.key==='Enter'){addBtn.click();}});
+    customRow.appendChild(customInp);customRow.appendChild(addBtn);
+    body.appendChild(chips);body.appendChild(customRow);box.appendChild(hdr);box.appendChild(body);card.appendChild(box);
     });
     const nr=div('display:flex;gap:10px;margin-top:10px;');
     nr.appendChild(btn('background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);color:#64748b;border-radius:9px;padding:12px;font-size:12px;flex:1;','← Back',()=>{S.obStep=0;render();}));
@@ -583,15 +615,14 @@ function renderHome(){
   const now=new Date();const dateStr=now.toLocaleDateString('en-US',{weekday:'long',month:'short',day:'numeric'});
   const wrap=div('');
   const hdr=div('margin-bottom:14px;');
-  hdr.appendChild(div('color:#475569;font-size:9px;letter-spacing:3px;text-transform:uppercase;margin-bottom:5px;',["TODAY'S REVISION"]));
-  hdr.appendChild(div('font-size:17px;font-weight:bold;margin-bottom:2px;',[dateStr]));
-  hdr.appendChild(div('font-size:10px;color:#334155;',['Daily concepts rotate automatically 🔄']));
+  hdr.appendChild(div('color:#475569;font-size:9px;letter-spacing:3px;text-transform:uppercase;margin-bottom:5px;',["TODAY'S REVISION"])); hdr.appendChild(div('font-size:17px;font-weight:bold;margin-bottom:2px;',[dateStr]));
+  hdr.appendChild(div('font-size:10px;color:#64748b;',['Daily concepts rotate automatically 🔄']));
   wrap.appendChild(hdr);
 
   const days=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];const ti=now.getDay();
   const ww=div('background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:10px;padding:10px 12px;margin-bottom:14px;');
   const wg=div('display:flex;gap:4px;');
-  days.forEach((d,i)=>{const a=i===ti;const c=div('flex:1;text-align:center;');c.appendChild(div(`background:${a?'rgba(79,195,247,0.2)':'rgba(255,255,255,0.04)'};border:1px solid ${a?'rgba(79,195,247,0.4)':'rgba(255,255,255,0.06)'};border-radius:5px;padding:6px 0;margin-bottom:2px;font-size:10px;font-weight:bold;color:${a?'#4fc3f7':'#334155'};`,[a?'✓':'·']));c.appendChild(div('font-size:8px;color:#334155;',[d]));wg.appendChild(c);});
+  days.forEach((d,i)=>{const a=i===ti;const c=div('flex:1;text-align:center;');c.appendChild(div(`background:${a?'rgba(79,195,247,0.2)':'rgba(255,255,255,0.04)'};border:1px solid ${a?'rgba(79,195,247,0.4)':'rgba(255,255,255,0.06)'};border-radius:5px;padding:6px 0;margin-bottom:2px;font-size:10px;font-weight:bold;color:${a?'#4fc3f7':'#334155'};`,[a?'✓':'·']));c.appendChild(div('font-size:8px;color:#64748b;',[d]));wg.appendChild(c);});
   ww.appendChild(wg);wrap.appendChild(ww);
 
   const allSubjects=Object.entries(S.subjects);
@@ -636,7 +667,7 @@ function renderHome(){
       list.appendChild(card);
     });
     if(userPlan!=='pro'&&arr.length>FREE_LIMIT)list.appendChild(renderProGate());
-    box.appendChild(list);wrap.appendChild(box);
+      box.appendChild(list);wrap.appendChild(box);
   });
   return wrap;
 }
@@ -655,10 +686,9 @@ function renderRevision(){
   topRow.appendChild(pr);wrap.appendChild(topRow);
   wrap.appendChild(div(`font-size:9px;color:${accent};letter-spacing:3px;margin-bottom:3px;`,[field.toUpperCase()+' · DAILY REVISION']));
   wrap.appendChild(div('font-size:17px;font-weight:bold;margin-bottom:2px;',[topic]));
-  wrap.appendChild(div('font-size:9px;color:#334155;margin-bottom:14px;',[`Concept ${idx+1} of ${concepts.length} · rotates daily`]));
+  wrap.appendChild(div('font-size:9px;color:#64748b;margin-bottom:14px;',[`Concept ${idx+1} of ${concepts.length} · rotates daily`]));
   const sc=div(`background:linear-gradient(145deg,${bg},rgba(6,6,16,0.9));border:1px solid ${accent}33;border-radius:12px;padding:16px;margin-bottom:10px;`);
-  sc.appendChild(div(`font-size:9px;color:${accent};letter-spacing:2px;margin-bottom:8px;`,["TODAY'S FOCUS"]));
-  sc.appendChild(div('font-size:14px;font-weight:bold;margin-bottom:10px;',[c.title]));
+  sc.appendChild(div(`font-size:9px;color:${accent};letter-spacing:2px;margin-bottom:8px;`,["TODAY'S FOCUS"])); sc.appendChild(div('font-size:14px;font-weight:bold;margin-bottom:10px;',[c.title]));
   const st=div(`font-size:11px;color:#94a3b8;line-height:1.7;border-left:2px solid ${accent};padding-left:10px;font-style:italic;`);st.textContent=c.spark;sc.appendChild(st);wrap.appendChild(sc);
   const cc=div('background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:13px;margin-bottom:10px;');
   cc.appendChild(div('font-size:9px;color:#4fc3f7;letter-spacing:2px;margin-bottom:8px;',['📌 KEY POINTS']));
@@ -843,36 +873,22 @@ function renderAccount(){
 
 // === MY NOTES FEATURE =========================================================
 
-// ── Gemini AI ─────────────────────────────────────────────────────────────────
-// NOTE: For production, move this call to a Supabase Edge Function
-// so the key never appears in browser source. See README.
-const _k = ['AQ','.Ab8RN6Iw9Tkr7Cce9OEKKNspka4Zf5DfM9HTOkzL6ELGrvorVA'].join('');
-let _aiCalls = 0; const _aiLimit = 20; // max 20 AI calls per session
-
+// ── Gemini AI (free) ──────────────────────────────────────────────────────────
+const GEMINI_KEY = 'AQ.Ab8RN6Iw9Tkr7Cce9OEKKNspka4Zf5DfM9HTOkzL6ELGrvorVA'
 async function callClaude(systemPrompt, userMessage, maxTokens) {
   maxTokens = maxTokens || 1000;
-  if (_aiCalls >= _aiLimit) throw new Error('Daily AI limit reached. Please try again tomorrow.');
-  _aiCalls++;
-  const url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=' + _k;
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 30000); // 30s timeout
-  try {
-    const resp = await fetch(url, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      signal: controller.signal,
-      body: JSON.stringify({
-        contents: [{ parts: [{ text: systemPrompt + '\n\n' + userMessage }] }],
-        generationConfig: { maxOutputTokens: maxTokens, temperature: 0.7 }
-      })
-    });
-    if (!resp.ok) throw new Error('AI service error: ' + resp.status);
-    const data = await resp.json();
-    if (data.error) throw new Error(data.error.message || 'Gemini API error');
-    return data.candidates[0].content.parts[0].text;
-  } finally {
-    clearTimeout(timeout);
-  }
+  const url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=' + GEMINI_KEY;
+  const resp = await fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      contents: [{ parts: [{ text: systemPrompt + '\n\n' + userMessage }] }],
+      generationConfig: { maxOutputTokens: maxTokens, temperature: 0.7 }
+    })
+  });
+  const data = await resp.json();
+  if (data.error) throw new Error(data.error.message || 'Gemini API error');
+  return data.candidates[0].content.parts[0].text;
 }
 
 function loadScript(src) {
@@ -976,15 +992,15 @@ function renderMyNotes() {
   };
 
   if (notes.length === 0) {
-    wrap.appendChild(div('text-align:center;padding:20px;color:#334155;font-size:12px;', ['No notes uploaded yet. Upload your first file above!']));
+    wrap.appendChild(div('text-align:center;padding:20px;color:#64748b;font-size:12px;', ['No notes uploaded yet. Upload your first file above!']));
   } else {
     wrap.appendChild(div('color:#475569;font-size:9px;letter-spacing:3px;text-transform:uppercase;margin-bottom:10px;', ['YOUR UPLOADED NOTES']));
     notes.forEach(function(note, idx) {
       const card = div('background:rgba(255,255,255,0.04);border:1px solid rgba(79,195,247,0.2);border-radius:12px;padding:14px;margin-bottom:10px;');
       const top = div('display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;');
       const left = div('flex:1;');
-      left.appendChild(div('font-size:14px;font-weight:bold;color:#e2e8f0;margin-bottom:3px;', [sanitise(note.name)]));
-      left.appendChild(div('font-size:10px;color:#4fc3f7;margin-bottom:3px;', [sanitise(note.subject)]));
+      left.appendChild(div('font-size:14px;font-weight:bold;color:#e2e8f0;margin-bottom:3px;', [note.name]));
+      left.appendChild(div('font-size:10px;color:#4fc3f7;margin-bottom:3px;', [note.subject]));
       left.appendChild(div('font-size:9px;color:#475569;', ['Uploaded: ' + note.uploadDate]));
       const delBtn = btn('background:none;border:none;color:rgba(255,82,82,0.4);font-size:18px;cursor:pointer;padding:0;', '\u00D7', function() {
         if(confirm('Delete "' + note.name + '"?')) { S.notes.splice(idx,1); render(); }
@@ -1048,8 +1064,7 @@ function renderNoteStudy() {
 function renderConceptContent(container, note) {
   const c = note.concepts; if(!c) return;
   const sc = div('background:linear-gradient(145deg,#0d1e35,rgba(6,6,16,0.9));border:1px solid rgba(79,195,247,0.3);border-radius:12px;padding:16px;margin-bottom:10px;');
-  sc.appendChild(div('font-size:9px;color:#4fc3f7;letter-spacing:2px;margin-bottom:8px;', ["TODAY'S FOCUS"]));
-  sc.appendChild(div('font-size:15px;font-weight:bold;margin-bottom:10px;', [c.todayFocus || 'Key Concepts']));
+  sc.appendChild(div('font-size:9px;color:#4fc3f7;letter-spacing:2px;margin-bottom:8px;', ["TODAY'S FOCUS"])); sc.appendChild(div('font-size:15px;font-weight:bold;margin-bottom:10px;', [c.todayFocus || 'Key Concepts']));
   const st = div('font-size:11px;color:#94a3b8;line-height:1.7;border-left:2px solid #4fc3f7;padding-left:10px;font-style:italic;');
   st.textContent = c.spark || ''; sc.appendChild(st); container.appendChild(sc);
   const kp = div('background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:13px;margin-bottom:10px;');
@@ -1163,30 +1178,205 @@ function renderNoteQuizContent(container) {
 }
 // === END MY NOTES FEATURE =====================================================
 
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// TOPICS PAGE — Dedicated page to manage and view all selected subjects
+// ═══════════════════════════════════════════════════════════════════════════════
+function renderTopics(){
+  const wrap = div('');
+
+  // ── Header ──────────────────────────────────────────────────────────────────
+  wrap.appendChild(div('color:#475569;font-size:9px;letter-spacing:3px;text-transform:uppercase;margin-bottom:6px;',['MY TOPICS']));
+  wrap.appendChild(div('font-size:17px;font-weight:bold;margin-bottom:4px;',['My Subjects 📚']));
+
+  // ── Stats row ───────────────────────────────────────────────────────────────
+  const totalSubjects = Object.values(S.subjects).flat().length;
+  const totalFields = Object.values(S.subjects).filter(a=>a&&a.length>0).length;
+  const statsRow = div('display:flex;gap:8px;margin-bottom:16px;');
+  [{l:'Total Subjects',v:totalSubjects,c:'#4fc3f7'},
+   {l:'Fields Active',v:totalFields,c:'#69f0ae'},
+   {l:'Plan',v:userPlan==='pro'?'Pro':'Free',c:userPlan==='pro'?'#ffb74d':'#64748b'}
+  ].forEach(function(s){
+    const c=div('background:rgba(255,255,255,0.04);border:1px solid '+s.c+'22;border-radius:9px;padding:10px;text-align:center;flex:1;');
+    c.appendChild(div('font-size:18px;font-weight:bold;color:'+s.c+';',[String(s.v)]));
+    c.appendChild(div('font-size:8px;color:#475569;letter-spacing:1px;margin-top:2px;',[s.l.toUpperCase()]));
+    statsRow.appendChild(c);
+  });
+  wrap.appendChild(statsRow);
+
+  // ── Search bar ──────────────────────────────────────────────────────────────
+  const searchWrap = div('margin-bottom:14px;');
+  const searchInp = document.createElement('input');
+  searchInp.type = 'text';
+  searchInp.placeholder = '🔍 Search subjects...';
+  searchInp.style.cssText = 'background:rgba(255,255,255,0.05);border:1px solid rgba(79,195,247,0.2);border-radius:9px;padding:10px 14px;color:#e2e8f0;font-family:Courier New,monospace;font-size:12px;outline:none;width:100%;';
+  searchInp.oninput = function(){ renderFieldList(searchInp.value.toLowerCase()); };
+  searchWrap.appendChild(searchInp);
+  wrap.appendChild(searchWrap);
+
+  // ── My selected subjects (compact view at top) ───────────────────────────────
+  const mySubjects = Object.values(S.subjects).flat();
+  if(mySubjects.length > 0){
+    const myWrap = div('background:rgba(255,255,255,0.03);border:1px solid rgba(79,195,247,0.15);border-radius:12px;padding:14px;margin-bottom:14px;');
+    myWrap.appendChild(div('color:#4fc3f7;font-size:9px;letter-spacing:3px;text-transform:uppercase;margin-bottom:10px;',['✅ MY SELECTED SUBJECTS ('+mySubjects.length+')']));
+    const chips = div('display:flex;flex-wrap:wrap;gap:6px;');
+    Object.entries(S.subjects).forEach(function(entry){
+      const field=entry[0], arr=entry[1];
+      if(!arr||!arr.length)return;
+      const accent=(FIELD_COLORS[field]||{accent:'#4fc3f7'}).accent;
+      arr.forEach(function(t){
+        const chip = div('display:flex;align-items:center;gap:5px;background:'+accent+'15;border:1px solid '+accent+'33;border-radius:20px;padding:5px 10px;');
+        const lbl = span('font-size:11px;color:'+accent+';',''); lbl.textContent=t;
+        const rm = btn('background:none;border:none;color:'+accent+';font-size:14px;cursor:pointer;padding:0;line-height:1;','×',function(){
+          S.subjects[field]=S.subjects[field].filter(function(x){return x!==t;});
+          render();
+        });
+        chip.appendChild(lbl); chip.appendChild(rm);
+        chips.appendChild(chip);
+      });
+    });
+    myWrap.appendChild(chips);
+    wrap.appendChild(myWrap);
+  }
+
+  // ── Field list with add subjects ─────────────────────────────────────────────
+  const fieldList = div('');
+  fieldList.id = 'field-list';
+  wrap.appendChild(fieldList);
+
+  function renderFieldList(search){
+    fieldList.innerHTML = '';
+    Object.entries(FIELDS).forEach(function(entry){
+      const field=entry[0], topics=entry[1];
+      const accent=(FIELD_COLORS[field]||{accent:'#4fc3f7'}).accent;
+      const added=(S.subjects[field]||[]);
+      const addedCount=added.length;
+
+      // Filter by search
+      const filteredTopics = search
+        ? topics.filter(function(t){return t.toLowerCase().includes(search)||field.toLowerCase().includes(search);})
+        : topics;
+      const filteredAdded = search
+        ? added.filter(function(t){return t.toLowerCase().includes(search);})
+        : added;
+      if(search && filteredTopics.length===0 && filteredAdded.length===0) return;
+
+      const box = div('background:rgba(255,255,255,0.02);border:1px solid '+accent+'22;border-radius:12px;margin-bottom:10px;overflow:hidden;');
+
+      // Field header
+      const hdr = div('background:'+accent+'0f;padding:12px 14px;display:flex;justify-content:space-between;align-items:center;cursor:pointer;');
+      const hl = div('');
+      const fieldTitle = span('color:'+accent+';font-size:13px;font-weight:bold;',''); fieldTitle.textContent=field;
+      const badge = div('display:inline-block;background:'+accent+'22;border:1px solid '+accent+'44;color:'+accent+';font-size:9px;padding:2px 8px;border-radius:10px;margin-left:8px;',[(addedCount)+' added']);
+      hl.appendChild(fieldTitle); hl.appendChild(badge);
+      const arrow = span('color:'+accent+';font-size:14px;transition:transform 0.2s;','▶');
+      hdr.appendChild(hl); hdr.appendChild(arrow);
+
+      // Field body (collapsed by default, open if has added subjects or matches search)
+      const body = div('padding:12px 14px;'+(addedCount>0||search?'':'display:none;'));
+      if(addedCount>0||search) arrow.style.transform='rotate(90deg)';
+
+      hdr.onclick = function(){
+        const isOpen = body.style.display !== 'none';
+        body.style.display = isOpen ? 'none' : 'block';
+        arrow.style.transform = isOpen ? 'rotate(0deg)' : 'rotate(90deg)';
+      };
+
+      // Suggested topics grid
+      body.appendChild(div('color:#475569;font-size:9px;letter-spacing:2px;text-transform:uppercase;margin-bottom:8px;',['SUGGESTED']));
+      const grid = div('display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px;');
+      (search ? filteredTopics : topics).forEach(function(t){
+        const isAdded = added.includes(t);
+        const b = btn(
+          'background:'+(isAdded?accent+'20':'rgba(255,255,255,0.04)')+';border:1px solid '+(isAdded?accent+'55':'rgba(255,255,255,0.1)')+';color:'+(isAdded?accent:'#94a3b8')+';border-radius:6px;padding:6px 11px;font-size:11px;',
+          (isAdded?'✓ ':'')+t,
+          function(){
+            if(!S.subjects[field])S.subjects[field]=[];
+            if(isAdded){
+              S.subjects[field]=S.subjects[field].filter(function(x){return x!==t;});
+            } else {
+              if(userPlan!=='pro'&&S.subjects[field].length>=FREE_LIMIT){
+                if(!confirm('Free plan: max ' + FREE_LIMIT + ' subjects per field. Upgrade to Pro for unlimited!'))return;
+                doUpgrade(); return;
+              }
+              S.subjects[field].push(t);
+            }
+            render();
+          }
+        );
+        grid.appendChild(b);
+      });
+      body.appendChild(grid);
+
+      // Custom subject add row
+      body.appendChild(div('color:#475569;font-size:9px;letter-spacing:2px;text-transform:uppercase;margin-bottom:6px;',['ADD YOUR OWN SUBJECT']));
+      const addRow = div('display:flex;gap:7px;');
+      const addInp = document.createElement('input');
+      addInp.type='text'; addInp.placeholder='e.g. Quantum Physics...';
+      addInp.style.cssText='background:rgba(255,255,255,0.05);border:1px solid rgba(79,195,247,0.2);border-radius:7px;padding:8px 11px;color:#e2e8f0;font-family:Courier New,monospace;font-size:11px;outline:none;flex:1;';
+      const addB = btn('background:rgba(79,195,247,0.12);border:1px solid rgba(79,195,247,0.3);color:#4fc3f7;border-radius:7px;padding:8px 12px;font-size:12px;font-weight:bold;white-space:nowrap;','+ Add',function(){
+        const val=addInp.value.trim();
+        if(!val)return;
+        if(!S.subjects[field])S.subjects[field]=[];
+        if(userPlan!=='pro'&&S.subjects[field].length>=FREE_LIMIT){
+          if(!confirm('Free plan: max ' + FREE_LIMIT + ' subjects per field. Upgrade to Pro for unlimited!'))return;
+          doUpgrade(); return;
+        }
+        if(!S.subjects[field].includes(val)){S.subjects[field].push(val);render();}
+        else{addInp.placeholder='Already added!';addInp.value='';}
+      });
+      addInp.addEventListener('keydown',function(e){if(e.key==='Enter')addB.click();});
+      addRow.appendChild(addInp); addRow.appendChild(addB);
+      body.appendChild(addRow);
+
+      // Show added custom subjects (ones not in FIELDS list)
+      const customAdded = added.filter(function(t){return !topics.includes(t);});
+      if(customAdded.length>0){
+        body.appendChild(div('color:#475569;font-size:9px;letter-spacing:2px;text-transform:uppercase;margin-top:10px;margin-bottom:6px;',['YOUR CUSTOM SUBJECTS']));
+        const customChips=div('display:flex;flex-wrap:wrap;gap:6px;');
+        customAdded.forEach(function(t){
+          const chip=div('display:flex;align-items:center;gap:5px;background:rgba(255,183,77,0.12);border:1px solid rgba(255,183,77,0.3);border-radius:20px;padding:5px 10px;');
+          const lbl=span('font-size:11px;color:#ffb74d;','');lbl.textContent=t;
+          const rm=btn('background:none;border:none;color:#ffb74d;font-size:14px;cursor:pointer;padding:0;','×',function(){
+            S.subjects[field]=S.subjects[field].filter(function(x){return x!==t;});render();
+          });
+          chip.appendChild(lbl);chip.appendChild(rm);customChips.appendChild(chip);
+        });
+        body.appendChild(customChips);
+      }
+
+      box.appendChild(hdr); box.appendChild(body);
+      fieldList.appendChild(box);
+    });
+  }
+
+  renderFieldList('');
+  return wrap;
+}
+// ═══════════════════════════════════════════════════════════════════════════════
+
 // ─── BOOT ─────────────────────────────────────────────────────────────────────
 async function boot(){
-  const ok=initSupabase();
+  // Wait for Supabase CDN to load (up to 5 seconds)
+  let attempts = 0;
+  while(!window.supabase && attempts < 20){
+    await new Promise(r => setTimeout(r, 250));
+    attempts++;
+  }
+  const ok = initSupabase();
   if(ok){
     try{
-      const {data:{session}}=await sb.auth.getSession();
-      if(session?.user){currentUser=session.user;await loadUserData();}
-    }catch(e){console.log('Session check failed, showing login');}
+      const {data, error} = await sb.auth.getSession();
+      if(!error && data?.session?.user){
+        currentUser = data.session.user;
+        await loadUserData();
+      }
+    }catch(e){ console.log('Session check:', e.message); }
+  } else {
+    console.log('Running without Supabase - offline mode');
   }
   render();
 }
-
-// ── Session security: auto sign-out after 8 hours of inactivity ──────────────
-let _lastActivity = Date.now();
-document.addEventListener('click', () => _lastActivity = Date.now());
-document.addEventListener('keydown', () => _lastActivity = Date.now());
-setInterval(async () => {
-  if (currentUser && currentUser.id !== 'offline') {
-    if (Date.now() - _lastActivity > 8 * 60 * 60 * 1000) {
-      await sbSignOut(); render();
-    }
-  }
-}, 60000); // check every minute
-
 boot();
 </script>
 </body>
