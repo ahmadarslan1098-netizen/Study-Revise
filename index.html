@@ -69,43 +69,43 @@ const FIELD_COLORS = {
 function getGenericConcepts(topic) {
   return [
     {
-      title: topic + ' — Core Principles',
-      spark: 'Mastering ' + topic + ' starts with understanding its foundational principles. These are the building blocks every expert relies on — get these right and everything else follows.',
+      title: topic + ' - Introduction and Foundations',
+      spark: topic + ' is best learned by first asking what problem the subject solves, what ideas it uses repeatedly, and how experts reason with those ideas.',
       core: [
-        'Define key terms clearly before solving any problem',
-        'Understand the "why" behind every rule or formula',
-        'Identify patterns that repeat across different problems',
-        'Link new knowledge to concepts you already understand well',
+        'Introduction: define the topic, its purpose, and the kinds of questions it helps answer.',
+        'Core concepts: learn the key vocabulary, models, rules, and relationships before memorising details.',
+        'Detailed explanation: connect each rule to the reason it works, including limits and common exceptions.',
+        'Examples: solve or analyse representative cases, then compare them with near-miss cases.',
       ],
-      realWorld: topic + ' is applied daily by professionals in industry, research, and practice. Understanding it opens doors to real problem-solving in the workplace.',
-      interview: 'Interviewers often ask: "Explain ' + topic + ' to someone with no background in it." Simplifying complex ideas shows deep understanding.',
-      market: 'Proficiency in ' + topic + ' is consistently ranked among the most sought-after skills by employers globally.',
+      realWorld: 'Use examples from ' + topic + ' to test whether you can apply ideas in unfamiliar situations, not only repeat definitions.',
+      interview: 'Key points: be able to explain the central idea, justify a method, interpret evidence, and identify the most likely misconception.',
+      market: 'Summary: strong understanding of ' + topic + ' means you can define the idea, explain why it matters, apply it, and evaluate an answer.',
     },
     {
-      title: topic + ' — Study Strategy',
-      spark: 'How you study ' + topic + ' matters as much as what you study. Active recall, spaced repetition, and practice problems beat passive reading every time.',
+      title: topic + ' - Conceptual Understanding',
+      spark: 'Good answers in ' + topic + ' usually show relationships: cause and effect, structure and function, rule and exception, or evidence and conclusion.',
       core: [
-        'Active recall: close your notes and write what you remember',
-        'Spaced repetition: review material at increasing intervals',
-        'Practice problems: doing beats reading for retention',
-        'Teach it: explain the topic out loud to solidify understanding',
+        'Introduction: start with a guiding question such as "What changes, what stays constant, and why?"',
+        'Core concepts: separate facts from principles; principles transfer to new questions.',
+        'Detailed explanation: build a chain of reasoning instead of listing disconnected points.',
+        'Examples: practise with easy, medium, and hard cases so the concept survives exam pressure.',
       ],
-      realWorld: 'Top performers in every field — medicine, law, engineering — use these evidence-based study techniques to retain knowledge under exam pressure.',
-      interview: '"How did you learn ' + topic + '?" is a common interview opener. Discussing your systematic approach shows maturity and self-awareness.',
-      market: 'The ability to learn quickly and deeply is itself a top-10 skill listed by the World Economic Forum for the next decade.',
+      realWorld: topic + ' becomes useful when you can choose the right concept for a situation and explain why other tempting approaches fail.',
+      interview: 'Key points: compare similar terms, state assumptions clearly, and support claims with examples or calculations where appropriate.',
+      market: 'Summary: revise by explaining, applying, checking, and correcting; this produces durable understanding rather than short-term recall.',
     },
     {
-      title: topic + ' — Common Mistakes',
-      spark: 'Knowing what NOT to do in ' + topic + ' is just as valuable as knowing the right approach. Most marks are lost to the same predictable errors.',
+      title: topic + ' - Examples and Common Misconceptions',
+      spark: 'Misconceptions in ' + topic + ' often come from using a rule in the wrong context or recognising a keyword without understanding the idea behind it.',
       core: [
-        'Skipping fundamentals and jumping to advanced material too soon',
-        'Memorising without understanding the underlying logic',
-        'Not attempting past papers or practice questions under timed conditions',
-        'Ignoring feedback from marked work — mistakes are your best teachers',
+        'Introduction: identify what a typical exam or classroom problem is really testing.',
+        'Core concepts: note the conditions under which each method, law, or definition applies.',
+        'Detailed explanation: trace the reasoning step by step and label any assumption.',
+        'Examples: contrast a correct example with a plausible wrong answer to expose the misconception.',
       ],
-      realWorld: 'Professionals across all fields say their biggest growth came from analysing failures. Errors in ' + topic + ' are learning opportunities, not setbacks.',
-      interview: 'Being asked "What was your biggest mistake studying this?" is a test of self-awareness. Having a genuine answer with what you learned impresses every panel.',
-      market: 'Problem-solving ability — including the ability to learn from mistakes — is rated the #1 skill gap by employers worldwide.',
+      realWorld: 'Real work with ' + topic + ' rewards careful judgement: the best answer is often the one that notices constraints, evidence, or edge cases.',
+      interview: 'Key points: avoid vague wording, check units or definitions, and explain why incorrect options are attractive but wrong.',
+      market: 'Summary: learn the concept, practise varied examples, review mistakes, and refine your explanation until it is precise.',
     },
   ];
 }
@@ -118,6 +118,12 @@ const CONCEPTS_DB = {
   ],
   'Physics': [
     {title:"Newton's Laws of Motion", spark:'Three sentences written in 1687 that explain how everything in the universe moves — from a falling apple to a spacecraft orbiting Mars.', core:['1st Law: An object stays at rest or constant velocity unless acted on by a net force','2nd Law: F = ma — force equals mass times acceleration','3rd Law: Every action has an equal and opposite reaction','Weight = mg where g = 9.8 m/s²'], realWorld:'Every car, plane, and rocket ever built was designed using Newton\'s Laws. Your seatbelt works because of the 1st Law — your body keeps moving when the car stops.', interview:'"A car accelerates from 0 to 60 km/h in 5 seconds. What is its acceleration?" a = Δv/t = (60/3.6)/5 = 3.33 m/s².', market:'Classical mechanics underpins all structural engineering, automotive design, and aerospace — industries employing millions globally.'}, {title:'Thermodynamics — Laws', spark:'The universe has rules about energy — and the second law says you can never win. You can\'t even break even. Understanding why unlocks all of engineering.', core:['1st Law: Energy is conserved — it cannot be created or destroyed','2nd Law: Entropy (disorder) always increases in a closed system','Efficiency = useful energy out / total energy in','Carnot efficiency: η = 1 − T_cold/T_hot'], realWorld:'Every power station, refrigerator, and car engine is designed around thermodynamic limits. Electric vehicles achieve ~90% efficiency vs ~25% for petrol engines.', interview:'"Why can\'t we have a 100% efficient engine?" The Second Law forbids it — some energy always becomes waste heat. Know this cold for engineering interviews.', market:'Thermodynamics knowledge is critical for the green energy transition — heat pumps, solar thermal, and hydrogen production all depend on it.'},
+  ],
+  'Electronics': [
+    {title:'Semiconductor Diodes and Rectification', spark:'A diode is a one-way valve for electric current. Understanding the p-n junction explains why chargers, power supplies, radios, and protection circuits work.', core:['Introduction: a diode is formed by joining p-type and n-type semiconductor material, creating a depletion region at the junction.','Core concepts: forward bias lowers the junction barrier and allows current; reverse bias widens the barrier and blocks current until breakdown.','Detailed explanation: the diode I-V curve is non-linear, so a small voltage change near the turn-on region can cause a large current change.','Examples: a bridge rectifier uses four diodes to convert AC into pulsating DC before filtering with a capacitor.'], realWorld:'Phone chargers, laptop adapters, solar panels, LED lighting, and reverse-polarity protection all rely on diode behaviour.', interview:'Key points: explain forward bias, reverse bias, depletion region, threshold voltage, breakdown, and why rectifiers need filtering.', market:'Summary: diodes are foundational components for power conversion, signal detection, voltage regulation, and circuit protection.'},
+    {title:'Transistors as Switches and Amplifiers', spark:'A transistor lets a small signal control a larger current. That single idea is the basis of digital logic, audio amplification, sensors, and processors.', core:['Introduction: BJTs are current-controlled devices, while MOSFETs are voltage-controlled devices with an insulated gate.','Core concepts: cutoff means off, saturation/triode means strongly on, and the active region allows amplification.','Detailed explanation: biasing sets the operating point so the transistor responds predictably instead of clipping or staying off.','Examples: a microcontroller pin can drive a MOSFET gate to switch a motor, relay, or LED strip safely.'], realWorld:'Every computer chip contains billions of MOSFETs, while power electronics use transistors to control motors, converters, and battery systems.', interview:'Key points: compare BJT and MOSFET control, explain gain, biasing, switching losses, and why a base/gate resistor may be needed.', market:'Summary: transistor knowledge connects basic circuit theory to embedded systems, robotics, telecommunications, and power electronics.'},
+    {title:'Operational Amplifiers and Feedback', spark:'An op-amp is a high-gain amplifier made useful by feedback. With a few resistors, it can amplify, filter, compare, integrate, or buffer signals.', core:['Introduction: an ideal op-amp has very high input impedance, very low output impedance, and extremely high open-loop gain.','Core concepts: negative feedback forces the inputs to nearly the same voltage and makes circuit gain depend on external components.','Detailed explanation: bandwidth, slew rate, input offset, and supply rails limit real op-amp performance.','Examples: a non-inverting amplifier has gain 1 + Rf/Rg, while a voltage follower buffers a sensor without loading it.'], realWorld:'Sensor interfaces, audio circuits, medical instruments, active filters, and control systems all use op-amp feedback.', interview:'Key points: explain virtual short, negative feedback, saturation, input impedance, and the difference between comparator and amplifier use.', market:'Summary: op-amps are essential for analogue electronics because they turn weak or noisy real-world signals into usable voltages.'},
+    {title:'RC Circuits, Filtering, and Time Constants', spark:'Capacitors and resistors shape how voltages change over time. The time constant tau = RC predicts charging, discharging, smoothing, and filtering.', core:['Introduction: a capacitor stores charge, while a resistor limits the rate at which that charge can move.','Core concepts: after one time constant, a charging capacitor reaches about 63% of its final voltage; after five, it is nearly complete.','Detailed explanation: RC low-pass filters pass slow changes and attenuate high-frequency noise; high-pass filters do the reverse.','Examples: a capacitor after a rectifier smooths ripple, and an RC debounce circuit cleans noisy switch transitions.'], realWorld:'Power supplies, audio crossovers, sensor smoothing, timing circuits, and communication filters all depend on RC behaviour.', interview:'Key points: define tau = RC, explain cutoff frequency, phase shift, ripple reduction, and why capacitors block DC after charging.', market:'Summary: filtering is a core electronics skill because real signals contain noise, transients, and unwanted frequency components.'},
   ],
   'Programming': [
     {title:'Data Structures — Arrays & Lists', spark:'An array is the simplest way to store many items — like a row of labelled boxes. Choosing the right data structure is the first step to writing fast code.', core:['Array: fixed size, O(1) access by index','Linked List: flexible size, O(n) access, O(1) insert/delete at head','Stack: LIFO — Last In First Out','Queue: FIFO — First In First Out'], realWorld:'Every app on your phone uses arrays and lists. Your music playlist is a list. Your browser history uses a stack (the back button pops the last page).', interview:'"What is the time complexity of accessing element at index i in an array?" O(1) — constant time. Then: "And in a linked list?" O(n) — must traverse from head.', market:'Data structures are tested in every major tech company interview (Google, Meta, Amazon). Mastering them is the single biggest factor in passing technical screens.'},
@@ -146,7 +152,7 @@ const CONCEPTS_DB = {
     {title:"Freud's Psychoanalytic Theory", spark:"Like it or not, Freud changed how humanity thinks about itself. His ideas — even the wrong ones — forced us to take the unconscious mind seriously for the first time.", core:['Id: primitive instincts and drives (unconscious)','Ego: rational mediator between id, superego and reality','Superego: internalised moral standards and ideals','Defence mechanisms: repression, projection, displacement, rationalisation'], realWorld:"Psychoanalytic concepts permeate modern therapy, marketing (understanding hidden desires), literature, and film criticism.", interview:'"Evaluate Freud\'s theory." Strong answer: strengths (pioneered unconscious, inspired research), weaknesses (unscientific, not falsifiable, sample bias). Show balance.', market:'Psychology graduates work in clinical settings, HR, UX research, marketing, education, and policy — one of the most versatile degrees.'}, ],
 };
 
-function getConceptsForTopic(t){ return CONCEPTS_DB[t] || getGenericConcepts(t); }
+function getConceptsForTopic(t){ const pack=getCachedSubjectPack(t, ''); const ai=pack&&pack.status==='ready'?normalizeConceptPack(pack,t):null; return ai || CONCEPTS_DB[t] || getGenericConcepts(t); }
 function getDailyConceptIndex(topic){
   const dateNum=parseInt(TODAY.replace(/-/g,''),10);
   const seed=topic.split('').reduce((a,c)=>a+c.charCodeAt(0),0);
@@ -154,6 +160,75 @@ function getDailyConceptIndex(topic){
   return(dateNum+seed)%arr.length;
 }
 function getDailyConcept(t){ return getConceptsForTopic(t)[getDailyConceptIndex(t)]; }
+
+function seededShuffle(arr, seedText){
+  const out = arr.slice();
+  let seed = seedText.split('').reduce((a,c)=>((a*31)+c.charCodeAt(0))>>>0, 2166136261);
+  for(let i=out.length-1;i>0;i--){
+    seed = (seed * 1664525 + 1013904223) >>> 0;
+    const j = seed % (i+1);
+    const tmp = out[i]; out[i] = out[j]; out[j] = tmp;
+  }
+  return out;
+}
+
+function normalizeQuestion(q, seedText){
+  if(!q || !Array.isArray(q.options) || q.options.length !== 4) return null;
+  const question = String(q.q || q.question || '').trim();
+  const oldAns = Number(q.ans);
+  if(!question || oldAns < 0 || oldAns > 3) return null;
+  const opts = q.options.map(o => String(o || '').trim());
+  if(opts.some(o => !o)) return null;
+  const seen = new Set(opts.map(o => o.toLowerCase()));
+  if(seen.size !== 4) return null;
+  const correct = opts[oldAns];
+  const shuffled = seededShuffle(opts, seedText + question);
+  return {
+    q: question,
+    options: shuffled,
+    ans: shuffled.indexOf(correct),
+    explanation: q.explanation ? String(q.explanation).trim() : '',
+    difficulty: q.difficulty || 'medium'
+  };
+}
+
+function validateAndBalanceQuestions(raw, topic){
+  const unique = [];
+  const seenQ = new Set();
+  (raw || []).forEach(function(q, i){
+    const nq = normalizeQuestion(q, topic + TODAY + i);
+    if(!nq) return;
+    const key = nq.q.toLowerCase().replace(/[^a-z0-9]+/g,' ').trim();
+    if(seenQ.has(key)) return;
+    seenQ.add(key); unique.push(nq);
+  });
+  const buckets = {easy:[], medium:[], hard:[]};
+  unique.forEach(q => (buckets[q.difficulty] || buckets.medium).push(q));
+  let selected = [].concat(buckets.easy.slice(0,2), buckets.medium.slice(0,2), buckets.hard.slice(0,2));
+  unique.forEach(q => { if(selected.length < 5 && !selected.includes(q)) selected.push(q); });
+  selected = selected.slice(0,5);
+  const desired = [0,1,2,3,0];
+  return selected.map(function(q, i){
+    if(q.ans === desired[i]) return q;
+    const opts = q.options.slice();
+    const correct = opts[q.ans];
+    const swap = desired[i];
+    opts[q.ans] = opts[swap];
+    opts[swap] = correct;
+    return Object.assign({}, q, {options: opts, ans: swap});
+  });
+}
+
+function fallbackQuizForTopic(topic){
+  return [
+    {difficulty:'easy', q:'Which approach best starts a strong study session in '+topic+'?', options:['Listing unrelated facts','Defining the central concept and its purpose','Skipping definitions and guessing from keywords','Memorising only one example'], ans:1, explanation:'Students need a clear central concept before details become meaningful.'},
+    {difficulty:'easy', q:'A useful example in '+topic+' should mainly help you:', options:['Recognise how a concept works in context','Avoid practising difficult cases','Replace explanation with memorisation','Ignore assumptions and limits'], ans:0, explanation:'Examples are valuable when they show how and when an idea applies.'},
+    {difficulty:'medium', q:'When two answers in '+topic+' look similar, what is the best next step?', options:['Choose the longer answer automatically','Check the assumptions, definitions, and evidence behind each answer','Pick the answer that uses the most technical words','Avoid the question until later'], ans:1, explanation:'Conceptual questions often turn on assumptions, definitions, and evidence.'},
+    {difficulty:'medium', q:'What shows deeper understanding of '+topic+' than simple recall?', options:['Repeating a definition exactly','Applying a principle to a new but related situation','Highlighting every sentence in notes','Remembering the page number of a fact'], ans:1, explanation:'Transfer to a new situation is a stronger signal than recall alone.'},
+    {difficulty:'hard', q:'A student gets a '+topic+' problem wrong because they used a familiar rule in the wrong situation. What should they review first?', options:['Only the final answer','The conditions that make the rule valid','The neatness of their handwriting','Unrelated advanced material'], ans:1, explanation:'Misapplied rules usually come from missing the conditions or limits of the concept.'},
+    {difficulty:'hard', q:'Which revision task is most likely to reveal hidden misconceptions in '+topic+'?', options:['Reading notes silently','Explaining a solution and why each wrong option fails','Copying a textbook paragraph','Studying only solved examples'], ans:1, explanation:'Explaining wrong options exposes boundaries between similar ideas.'},
+  ];
+}
 
 // ─── QUIZ BANK ────────────────────────────────────────────────────────────────
 const QUIZ_DB = {
@@ -168,6 +243,14 @@ const QUIZ_DB = {
     {q:"Which has better energy efficiency — electric or petrol cars?",options:["Petrol (~90%)","Equal","Electric (~90%)","Depends on fuel type only"],ans:2},
     {q:"Acceleration due to gravity on Earth is approximately:",options:["9.8 m/s²","8.9 m/s²","10.8 m/s²","1 m/s²"],ans:0},
     {q:"The Carnot efficiency formula is:",options:["1 - T_hot/T_cold","T_hot - T_cold","1 - T_cold/T_hot","T_cold/T_hot"],ans:2},
+  ],
+  'Electronics':[
+    {difficulty:'easy',q:'What happens to a silicon diode when it is forward biased beyond its threshold region?',options:['It conducts significant current','It becomes a perfect open circuit','Its depletion region grows without limit','It converts DC into AC by itself'],ans:0,explanation:'Forward bias reduces the junction barrier so current can flow through the diode.'},
+    {difficulty:'easy',q:'Why is a capacitor often placed after a rectifier in a DC power supply?',options:['To increase mains frequency','To smooth voltage ripple between rectified peaks','To make the transformer unnecessary','To force current to flow only one way'],ans:1,explanation:'The capacitor charges near peaks and discharges between them, reducing ripple.'},
+    {difficulty:'medium',q:'In a common-source MOSFET switching circuit, what primarily controls the drain current?',options:['Gate-to-source voltage','Colour of the package','Length of the output wire only','Ambient light level'],ans:0,explanation:'A MOSFET is voltage-controlled; Vgs determines whether the channel conducts.'},
+    {difficulty:'medium',q:'Negative feedback in an op-amp amplifier is mainly used to:',options:['Make gain depend predictably on external components','Force the output to saturate permanently','Remove the need for a power supply','Turn the op-amp into a passive resistor'],ans:0,explanation:'Negative feedback trades huge open-loop gain for stable, predictable closed-loop behaviour.'},
+    {difficulty:'hard',q:'An RC low-pass filter is fed with a signal far above its cutoff frequency. What should you expect at the output?',options:['The signal is strongly attenuated and phase shifted','The signal is amplified without limit','Only DC is blocked while high frequency passes unchanged','The resistor stores charge permanently'],ans:0,explanation:'Above cutoff, capacitor impedance is low, so high-frequency content is reduced at the output.'},
+    {difficulty:'hard',q:'A BJT amplifier clips the top and bottom of a waveform. Which diagnosis best matches the problem?',options:['The transistor bias point or signal amplitude is pushing operation outside the active region','The circuit is working as an ideal linear amplifier','The collector resistor has no effect on voltage swing','The base-emitter junction cannot ever conduct'],ans:0,explanation:'Clipping usually means the signal drives the transistor into cutoff or saturation instead of staying in the active region.'},
   ],
   'Programming':[
     {q:"What is the time complexity of accessing index i in an array?",options:["O(n)","O(log n)","O(1)","O(n²)"],ans:2},
@@ -218,23 +301,16 @@ const QUIZ_DB = {
 };
 
 function getQuiz(topic){
-  const bank = QUIZ_DB[topic] || [
-    {q:"What is the most effective study technique for "+topic+"?",options:["Re-reading notes","Active recall and practice questions","Highlighting textbooks","Listening to lectures repeatedly"],ans:1},
-    {q:"When learning "+topic+", you should first:",options:["Memorise all facts","Understand core principles and frameworks","Start with the hardest topics","Skip fundamentals"],ans:1},
-    {q:"The best way to prepare for a "+topic+" exam is:",options:["Study everything once","Past papers under timed conditions","Read the textbook cover to cover","Group study only"],ans:1},
-    {q:"Spaced repetition in studying "+topic+" means:",options:["Studying for long hours in one session","Reviewing material at increasing time intervals","Spacing out your breaks","Studying with spaces between paragraphs"],ans:1},
-    {q:"To deepen understanding of "+topic+", you should:",options:["Memorise definitions only","Try to teach it to someone else","Skip difficult sections","Only study before exams"],ans:1},
-  ];
-  if(bank.length<=5)return bank;
+  const cached=getCachedSubjectPack(topic, '');
+  const bank = cached && cached.status === 'ready' && cached.quiz ? cached.quiz : (QUIZ_DB[topic] || fallbackQuizForTopic(topic));
   const dateNum=parseInt(TODAY.replace(/-/g,''),10);
   const seed=topic.split('').reduce((a,c)=>a+c.charCodeAt(0),0);
-  const start=(dateNum+seed)%bank.length;
-  const result=[];
-  for(let i=0;i<5;i++)result.push(bank[(start+i)%bank.length]);
-  return result;
+  const ordered = bank.length > 5 ? bank.slice((dateNum+seed)%bank.length).concat(bank.slice(0,(dateNum+seed)%bank.length)) : bank;
+  const validated = validateAndBalanceQuestions(ordered, topic);
+  return validated.length >= 5 ? validated : validateAndBalanceQuestions(fallbackQuizForTopic(topic), topic);
 }
 
-// ─── STATE ────────────────────────────────────────────────────────────────────
+// ─── STATE// ─── STATE ────────────────────────────────────────────────────────────────────
 const STORE='studyrevise_v1';
 const TODAY=new Date().toISOString().slice(0,10);
 let currentUser=null, userPlan='free';
@@ -676,7 +752,9 @@ function renderHome(){
 function renderRevision(){
   const {field,topic}=S.activeTopic;
   const {accent,bg}=FIELD_COLORS[field]||{accent:'#4fc3f7',bg:'#0d1e35'};
-  const concepts=getConceptsForTopic(topic);const idx=getDailyConceptIndex(topic);const c=concepts[idx];const str=S.strength[topic];
+  maybeRefreshDailySubjectPack(topic, field);
+  const fieldPack=getCachedSubjectPack(topic, field);
+  const concepts=(fieldPack&&fieldPack.status==='ready'?normalizeConceptPack(fieldPack,topic):null)||getConceptsForTopic(topic);const idx=getDailyConceptIndex(topic);const c=concepts[idx];const str=S.strength[topic];
   const wrap=div('');
   const topRow=div('display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;');
   topRow.appendChild(btn('background:none;border:1px solid rgba(79,195,247,0.2);color:#4fc3f7;border-radius:8px;padding:7px 12px;font-size:11px;','← Back',()=>{S.screen='home';S.activeTopic=null;render();}));
@@ -703,7 +781,7 @@ function renderRevision(){
   const mkc=div('background:rgba(206,147,216,0.04);border:1px solid rgba(206,147,216,0.15);border-radius:10px;padding:13px;margin-bottom:14px;');
   mkc.appendChild(div('font-size:9px;color:#ce93d8;letter-spacing:2px;margin-bottom:7px;',['📈 CAREER & MARKET INSIGHT']));
   const mt=div('font-size:11px;color:#cbd5e1;line-height:1.7;');mt.textContent=c.market;mkc.appendChild(mt);wrap.appendChild(mkc);
-  wrap.appendChild(btn(`background:${accent}22;border:1px solid ${accent}55;color:${accent};border-radius:9px;padding:13px;font-size:12px;width:100%;font-weight:bold;`,'🧠 Take Quiz on '+topic,()=>{S.activeQuiz={topic,field};S.quizState={questions:getQuiz(topic),current:0,selected:null,answered:false,score:0,answers:[],finished:false};S.screen='quizrun';render();}));
+  wrap.appendChild(btn(`background:${accent}22;border:1px solid ${accent}55;color:${accent};border-radius:9px;padding:13px;font-size:12px;width:100%;font-weight:bold;`,'🧠 Take Quiz on '+topic,()=>{S.activeQuiz={topic,field};const pack=getCachedSubjectPack(topic,field);const qs=(pack&&pack.status==='ready'&&pack.quiz)?validateAndBalanceQuestions(pack.quiz,topic):getQuiz(topic);S.quizState={questions:qs,current:0,selected:null,answered:false,score:0,answers:[],finished:false};S.screen='quizrun';render();}));
   return wrap;
 }
 
@@ -730,7 +808,7 @@ function renderQuizList(){
         const rl=div('');rl.appendChild(div('font-size:13px;color:#e2e8f0;margin-bottom:2px;',[t]));rl.appendChild(div('font-size:9px;color:#475569;',[qs?`Last: ${qs.date}`:'Not attempted']));
         const rr=div('display:flex;align-items:center;gap:8px;');if(qs)rr.appendChild(span(`font-size:12px;color:${col};font-weight:bold;`,`${qs.score}/5`));rr.appendChild(div(`background:${accent}22;border:1px solid ${accent}44;color:${accent};padding:4px 9px;border-radius:5px;font-size:10px;font-weight:bold;`,['Start →']));
         row.appendChild(rl);row.appendChild(rr);
-        row.onclick=()=>{S.activeQuiz={topic:t,field};S.quizState={questions:getQuiz(t),current:0,selected:null,answered:false,score:0,answers:[],finished:false};S.screen='quizrun';render();};
+        row.onclick=()=>{S.activeQuiz={topic:t,field};const pack=getCachedSubjectPack(t,field);const qs=(pack&&pack.status==='ready'&&pack.quiz)?validateAndBalanceQuestions(pack.quiz,t):getQuiz(t);S.quizState={questions:qs,current:0,selected:null,answered:false,score:0,answers:[],finished:false};S.screen='quizrun';render();};
         sw.appendChild(row);
       });
       if(userPlan!=='pro'&&arr.length>FREE_LIMIT)sw.appendChild(renderProGate());
@@ -875,7 +953,7 @@ function renderAccount(){
 
 // ── Gemini AI (free) ──────────────────────────────────────────────────────────
 const GEMINI_KEY = 'AQ.Ab8RN6Iw9Tkr7Cce9OEKKNspka4Zf5DfM9HTOkzL6ELGrvorVA'
-async function callClaude(systemPrompt, userMessage, maxTokens) {
+async function callGemini(systemPrompt, userMessage, maxTokens) {
   maxTokens = maxTokens || 1000;
   const url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=' + GEMINI_KEY;
   const resp = await fetch(url, {
@@ -890,6 +968,58 @@ async function callClaude(systemPrompt, userMessage, maxTokens) {
   if (data.error) throw new Error(data.error.message || 'Gemini API error');
   return data.candidates[0].content.parts[0].text;
 }
+async function callClaude(systemPrompt, userMessage, maxTokens) { return callGemini(systemPrompt, userMessage, maxTokens); }
+const DAILY_AI_CACHE = 'studyrevise_daily_ai_v2';
+function subjectCacheKey(topic, field){ return TODAY + '::' + (field || '') + '::' + topic; }
+function loadDailyAICache(){ try { return JSON.parse(localStorage.getItem(DAILY_AI_CACHE) || '{}'); } catch(e) { return {}; } }
+function saveDailyAICache(cache){ try { localStorage.setItem(DAILY_AI_CACHE, JSON.stringify(cache)); } catch(e) {} }
+function getCachedSubjectPack(topic, field){ const cache = loadDailyAICache(); return cache[subjectCacheKey(topic, field)] || cache[subjectCacheKey(topic, '')] || null; }
+function normalizeConceptPack(pack, topic){
+  if(!pack) return null;
+  const c = pack.concept || pack;
+  const core = Array.isArray(c.core) ? c.core : Array.isArray(c.keyPoints) ? c.keyPoints : [];
+  if(!c.title || !c.spark || core.length < 4) return null;
+  return [{
+    title: String(c.title).trim(),
+    spark: String(c.spark).trim(),
+    core: core.slice(0,6).map(x => String(x).trim()).filter(Boolean),
+    realWorld: String(c.realWorld || '').trim(),
+    interview: String(c.interview || c.examInsight || '').trim(),
+    market: String(c.market || c.summary || '').trim()
+  }];
+}
+async function refreshDailySubjectPack(topic, field){
+  const existing = getCachedSubjectPack(topic, field);
+  if(existing && existing.status === 'ready') return existing;
+  const cache = loadDailyAICache();
+  const key = subjectCacheKey(topic, field);
+  if(cache[key] && cache[key].status === 'loading') return cache[key];
+  cache[key] = {status:'loading', startedAt:Date.now()}; saveDailyAICache(cache);
+  try{
+    const raw = await callGemini(
+      'You are an expert curriculum writer and examiner. Create accurate DAILY study content and MCQs for the exact subject. Return ONLY JSON with this shape: {"concept":{"title":"specific concept for today","spark":"Introduction: what it is and why it matters","core":["Core Concepts: ...","Detailed Explanation: ...","Examples: ...","Key Points: ...","Summary: ..."],"realWorld":"real application specific to the subject","interview":"exam/interview insight specific to the subject","market":"career or advanced-study relevance specific to the subject"},"quiz":[{"difficulty":"easy|medium|hard","q":"conceptual question","options":["A","B","C","D"],"ans":0,"explanation":"why correct"}]}. Requirements: do not write generic study advice; every sentence must be about the named subject; include 2 easy, 2 medium, and 2 hard questions; options must be plausible and unique; exactly one correct answer per question.',
+      'Field: ' + (field || 'General') + '\nSubject: ' + topic + '\nDate: ' + TODAY + '\nMake today different from a previous day by choosing one focused concept inside the subject.',
+      1800
+    );
+    const parsed = JSON.parse(raw.replace(/```json|```/g,'').trim());
+    const concepts = normalizeConceptPack(parsed, topic);
+    const quiz = validateAndBalanceQuestions(parsed.quiz || [], topic);
+    if(!concepts || quiz.length < 5) throw new Error('Gemini returned incomplete subject content');
+    cache[key] = {status:'ready', date:TODAY, concept:concepts[0], quiz:quiz}; saveDailyAICache(cache);
+    return cache[key];
+  }catch(e){
+    cache[key] = {status:'error', date:TODAY, message:e.message}; saveDailyAICache(cache);
+    return cache[key];
+  }
+}
+function maybeRefreshDailySubjectPack(topic, field){
+  const pack = getCachedSubjectPack(topic, field);
+  if(pack && (pack.status === 'ready' || pack.status === 'loading')) return;
+  refreshDailySubjectPack(topic, field).then(function(result){
+    if(result && result.status === 'ready' && S.activeTopic && S.activeTopic.topic === topic && S.screen === 'revision') render();
+  });
+}
+
 
 function loadScript(src) {
   return new Promise(function(res, rej) {
@@ -975,7 +1105,7 @@ function renderMyNotes() {
       if (!text || text.length < 50) { statusDiv.innerHTML = '<div style="color:#ff8a80;font-size:12px;">\u26A0 Could not read text. Try a text-based PDF or .txt file.</div>'; return; }
       statusDiv.innerHTML = '<div style="color:#4fc3f7;font-size:12px;">\u{1F916} Claude is analysing your material...</div>';
       const summary = await callClaude(
-        'Analyse the provided study material and return ONLY a JSON object (no markdown, no code blocks): {"title":"short title","subject":"subject area","keyTopics":["topic1","topic2","topic3","topic4","topic5"],"summary":"2-3 sentence overview"}',
+        'Analyse the provided study material as an expert tutor. Return ONLY a JSON object (no markdown, no code blocks): {"title":"specific study title","subject":"accurate subject area","keyTopics":["specific topic 1","specific topic 2","specific topic 3","specific topic 4","specific topic 5"],"summary":"2-3 precise sentences naming the main ideas and why they matter"}. Avoid generic labels; infer the real subject from the text.',
         'Study material:\n\n' + text, 600
       );
       let parsed;
@@ -1043,7 +1173,7 @@ function renderNoteStudy() {
     (async function() {
       try {
         const result = await callClaude(
-          'You are a study tutor. Read the study material and create a daily study session. Return ONLY a JSON object (no markdown): {"todayFocus":"title of concept","spark":"1-2 sentence engaging hook","keyPoints":["point1","point2","point3","point4"],"deepDive":"3-4 sentences explaining in depth","examTip":"specific exam question with ideal answer","realWorld":"real-world application"}',
+          'You are an expert study tutor. Read the study material and create one accurate, subject-specific daily study session for students. Return ONLY a JSON object (no markdown): {"todayFocus":"specific concept title","spark":"Introduction: 1-2 sentences explaining what this topic is and why it matters","keyPoints":["Core concept 1 with detail","Core concept 2 with detail","Core concept 3 with detail","Core concept 4 with detail","Summary point tying the idea together"],"deepDive":"Detailed explanation: 5-7 sentences with mechanisms, relationships, assumptions, and common misconceptions.","examTip":"Examples: one exam-style question plus a concise ideal answer.","realWorld":"Key points and summary: practical application plus what students must remember."}. Avoid placeholder study advice unless the source text is actually about study methods.',
           'Study material:\n\n' + note.text + '\n\nDate: ' + TODAY, 1200
         );
         let parsed;
@@ -1105,12 +1235,14 @@ function renderNoteQuiz() {
     (async function() {
       try {
         const result = await callClaude(
-          'Generate 5 multiple choice quiz questions from the study material. Return ONLY a JSON array (no markdown): [{"q":"question","options":["A","B","C","D"],"ans":0,"explanation":"why correct"}]. ans is 0-based index.',
+          'Generate 6 high-quality multiple choice questions from the study material. Return ONLY a JSON array (no markdown): [{"difficulty":"easy|medium|hard","q":"clear conceptual question tied to the material","options":["plausible option A","plausible option B","plausible option C","plausible option D"],"ans":0,"explanation":"why the correct option is right and why the main distractor is wrong"}]. Include at least 2 easy, 2 medium, and 2 hard questions. Each question must test understanding or application, not isolated memorisation. Options must be realistic, unique, similar in length, and only one option may be correct. Randomise the correct answer position across A/B/C/D before returning.',
           'Study material:\n\n' + note.text, 1500
         );
         let questions;
         try { questions = JSON.parse(result.replace(/```json|```/g,'').trim()); }
-        catch(e2) { questions = [{q:'What is the most important concept in your uploaded material?',options:['Surface-level memorisation','Deep understanding of core principles','Skipping difficult sections','Speed reading only'],ans:1,explanation:'Deep understanding always outperforms memorisation for long-term retention.'},{q:'How should you approach studying this material?',options:['Read once and forget','Active recall and spaced repetition','Highlight everything','Study only the night before'],ans:1,explanation:'Active recall with spaced repetition is the most effective study technique proven by research.'},{q:'What does exam success in this subject require?',options:['Luck','Memorising the textbook word-for-word','Understanding principles and practising application','Studying for 24 hours straight'],ans:2,explanation:'Understanding and application always beats memorisation in exams.'},{q:'How do you identify gaps in your knowledge of this material?',options:['Assume you know everything','Test yourself regularly','Re-read the same pages','Ask a friend to explain it'],ans:1,explanation:'Regular self-testing reveals exactly where knowledge gaps exist.'},{q:'What is the best follow-up after studying this material?',options:['Immediately start something else','Close the book and never review','Practice questions and periodic review','Watch TV to relax your brain'],ans:2,explanation:'Practice questions and periodic review dramatically improve retention and exam performance.'}]; }
+        catch(e2) { questions = fallbackQuizForTopic(note.subject || note.name || 'this material'); }
+        questions = validateAndBalanceQuestions(questions, note.subject || note.name || 'Uploaded Material');
+        if(questions.length < 5) questions = validateAndBalanceQuestions(fallbackQuizForTopic(note.subject || note.name || 'this material'), note.subject || note.name || 'Uploaded Material');
         const noteIdx = S.notes.findIndex(function(n) { return n.id === note.id; });
         if(noteIdx >= 0) { S.notes[noteIdx].quizzes = questions; S.notes[noteIdx].lastQuizDate = TODAY; S.activeNote = S.notes[noteIdx]; }
         S.noteQuiz = { questions: questions, current:0, selected:null, answered:false, score:0, answers:[], finished:false };
@@ -1381,3 +1513,4 @@ boot();
 </script>
 </body>
 </html>
+
